@@ -1,0 +1,16 @@
+ConnectorDome
+Copyright 2026 BonAcqui LLC
+
+ConnectorDome is an open-source project stewarded by BonAcqui LLC.
+
+This product includes software developed by BonAcqui LLC.
+
+Apache License 2.0 covers ConnectorDome source, templates, and the generator.
+It does not transfer ownership of third-party APIs, datasets, specifications,
+or connectors authored by users/publishers.
+
+A ConnectorDome connector for an upstream source does not imply that the
+upstream owner endorses ConnectorDome unless that owner publishes or endorses
+the connector.
+
+SPDX-License-Identifier: Apache-2.0

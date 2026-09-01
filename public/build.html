@@ -13,7 +13,8 @@
       <a href="/">home</a>
       <a href="/build">build</a>
       <a href="/connectors">connectors</a>
-      <a href="/asf">asf</a>
+      <a href="/docs">docs</a>
+      <a href="https://github.com/persistentiterations/connectordome">github</a>
     </nav>
   </header>
   <p class="crumb"><a href="/">home</a> / build</p>
@@ -66,6 +67,14 @@
     <input id="timef" placeholder="observed_at">
     <label for="name">Connector name</label>
     <input id="name" value="demo-station">
+    <label for="license">Connector license</label>
+    <select id="license">
+      <option value="UNSPECIFIED" selected>UNSPECIFIED (you remain responsible)</option>
+      <option value="Apache-2.0">Apache-2.0</option>
+      <option value="MIT">MIT</option>
+      <option value="CC0-1.0">CC0-1.0</option>
+    </select>
+    <p class="note">Generator templates are Apache-2.0. This license is for your connector, not ConnectorDome claiming your source data.</p>
     <p>
       <button class="primary" type="button" id="preview">Preview ASF event</button>
     </p>
@@ -91,8 +100,15 @@
   </div>
 
   <footer>
-    <div>ConnectorDome · BonAcqui LLC</div>
-    <nav><a href="mailto:hello@connectordome.com">hello@connectordome.com</a></nav>
+    <div>ConnectorDome<br>Open-source ASF connector ecosystem<br>A BonAcqui LLC project</div>
+    <nav>
+      <a href="/privacy">privacy</a>
+      <a href="/terms">terms</a>
+      <a href="/security">security</a>
+      <a href="https://github.com/persistentiterations/connectordome">github</a>
+      <a href="https://fractalish.com">Fractalish</a>
+      <a href="https://bonacqui.com">BonAcqui LLC</a>
+    </nav>
   </footer>
   <script src="/builder.js"></script>
 </body>

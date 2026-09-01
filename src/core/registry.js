@@ -16,6 +16,9 @@ export const DEMO_CONNECTORS = [
     verification: "CONFORMANCE_PASS",
     description: "Demonstration JSON fixture. Not a live weather network.",
     demo: true,
+    license: "Apache-2.0",
+    generated_by: "ConnectorDome",
+    generator_license: "Apache-2.0",
   },
   {
     id: "demo-sim-battery",
@@ -34,6 +37,9 @@ export const DEMO_CONNECTORS = [
     verification: "CONFORMANCE_PASS",
     description: "Seeded simulator. Not a physical battery.",
     demo: true,
+    license: "Apache-2.0",
+    generated_by: "ConnectorDome",
+    generator_license: "Apache-2.0",
   },
   {
     id: "demo-text-claim",
@@ -52,6 +58,9 @@ export const DEMO_CONNECTORS = [
     verification: "CONFORMANCE_PASS",
     description: "Operator statement. Not a sensor.",
     demo: true,
+    license: "Apache-2.0",
+    generated_by: "ConnectorDome",
+    generator_license: "Apache-2.0",
   },
 ];
 

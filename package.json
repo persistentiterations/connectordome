@@ -1,9 +1,10 @@
 {
   "name": "connectordome",
-  "version": "0.1.0",
-  "private": true,
+  "version": "0.1.1",
+  "private": false,
+  "license": "Apache-2.0",
   "type": "module",
-  "description": "ConnectorDome — public ASF connector registry and self-service builder.",
+  "description": "Open ASF connector builder, verifier, and registry for provenance-bearing read-only observations.",
   "bin": {
     "dome": "./src/cli.js"
   },

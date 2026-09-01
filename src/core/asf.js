@@ -1,4 +1,6 @@
-/** ASF protocol objects. ConnectorDome does not invent a second ASF. */
+/** ASF protocol objects. ConnectorDome does not invent a second ASF.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 export const PROVENANCE_MODES = [
   "LIVE_LOCAL",

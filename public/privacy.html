@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Privacy — ConnectorDome</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="site">
+    <div class="brand">CONNECTORDOME<small>ASF connector registry + builder</small></div>
+    <nav>
+      <a href="/">home</a>
+      <a href="/build">build</a>
+      <a href="/connectors">connectors</a>
+      <a href="/docs">docs</a>
+      <a href="https://github.com/persistentiterations/connectordome">github</a>
+    </nav>
+  </header>
+  <p class="crumb"><a href="/">home</a> / privacy</p>
+  <h1>Privacy</h1>
+  <p class="lead">ConnectorDome is designed to collect and store as little as reasonably possible. This page describes v0.1 as implemented, not a generic SaaS template.</p>
+
+  <div class="rule">
+    DATA HANDLING — v0.1<br><br>
+    Guest build: processed in memory for connector construction. Not written to a ConnectorDome database.<br>
+    Sensor/API content: not sold. Not used for ads. Not used for model training.<br>
+    Generated connector: downloadable, portable, no ConnectorDome runtime required.<br>
+    Public publishing: opt-in only (not implemented in v0.1).<br>
+    Actuation: none.
+  </div>
+
+  <h2>Guest connector builds</h2>
+  <p>Inspect, preview, and build requests are handled by a Cloudflare Worker. The request body (URL, JSON payload, mapping) is processed in Worker memory. The Worker returns JSON, including a generated zip as <code>zip_base64</code>, to the browser.</p>
+  <p>v0.1 does <strong>not</strong> write guest builds to KV, D1, R2, or any other ConnectorDome store. There is no guest account and no server-side build history.</p>
+  <p>That is not a promise of “ephemeral deletion after N days.” There is no ConnectorDome-owned guest artifact store to delete. Cloudflare may still retain ordinary operational logs (see Infrastructure logging).</p>
+
+  <h2>Sensor / API content</h2>
+  <p>ConnectorDome does not claim ownership of submitted sensor or API data. v0.1 does not sell that content, does not use it for advertising, and does not send it to an LLM. Mapping suggestions are local heuristics, not a model call.</p>
+  <p>Sensor data is not automatically non-personal. A source may encode location, occupancy, device identity, workplace activity, home activity, or other sensitive information. Publishers remain responsible for having authority to process and expose their source data.</p>
+
+  <h2>Secrets</h2>
+  <p>Do not put credentials in published connector packages. Manifests may carry <code>secret_ref</code>, not <code>secret_value</code>. v0.1 does not provide a secret vault. If you type a token into a field, it is processed like any other request body and must not be published.</p>
+
+  <h2>Generated connectors</h2>
+  <p>Downloaded packages run independently of connectordome.com. v0.1 adapters fetch only the declared source URL. There is no ConnectorDome runtime phone-home.</p>
+
+  <h2>Published connectors</h2>
+  <p>Guest builds are not automatically published. A future public listing may intentionally retain manifest, publisher identity, docs, version history, package hash, and test receipts because publication is meant to persist. That is opt-in and is not implemented in v0.1.</p>
+
+  <h2>Infrastructure logging</h2>
+  <p>Cloudflare processes ordinary web-request metadata: IP address, request timing, URL path, status, and browser/network headers. Worker observability is enabled, so Cloudflare may retain operational logs. ConnectorDome does not claim that Cloudflare “sees nothing.”</p>
+
+  <h2>Cookies</h2>
+  <p>No advertising or analytics cookies are intentionally set by ConnectorDome v0.1. The site does not load third-party analytics scripts.</p>
+
+  <h2>Contact</h2>
+  <p><a href="mailto:privacy@connectordome.com">privacy@connectordome.com</a></p>
+
+  <footer>
+    <div>ConnectorDome<br>Open-source ASF connector ecosystem<br>A BonAcqui LLC project</div>
+    <nav>
+      <a href="/build">build</a>
+      <a href="/connectors">connectors</a>
+      <a href="/docs">docs</a>
+      <a href="https://github.com/persistentiterations/connectordome">github</a>
+      <a href="/privacy">privacy</a>
+      <a href="/terms">terms</a>
+      <a href="/security">security</a>
+      <a href="https://fractalish.com">Fractalish</a>
+      <a href="https://bonacqui.com">BonAcqui LLC</a>
+    </nav>
+  </footer>
+</body>
+</html>

@@ -1,3 +1,4 @@
+/** SPDX-License-Identifier: Apache-2.0 */
 import { inspectUrl } from "./core/inspect.js";
 import { classifyOpenApi } from "./core/openapi.js";
 import { previewEvent, simulationBody, textClaimBody } from "./core/builder.js";

@@ -1,0 +1,11 @@
+{
+  "name": "CONNECTORDOME_PUBLIC_V0_1_1",
+  "created_at": "2026-09-01T01:41:35.582Z",
+  "tests_returncode": 0,
+  "files": {
+    "LICENSE_RECEIPT.json": "2164f26a4e2cbab359adbf3e11fcb3df6a18ce56e9223c6876464bd20f8b1061",
+    "PUBLICATION_NOTES.md": "cf7f546ff40f46c1caa63441ed132f971826cfdbea9c553e454217a7f46d5fd0",
+    "TEST_RECEIPT.json": "29a38c985d0e911d85b1081f0c6f6306757f4738270eb1591dd1b764ec68580e"
+  },
+  "branched_from": "CONNECTORDOME_CORE_V0_1"
+}

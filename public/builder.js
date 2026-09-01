@@ -102,6 +102,7 @@ function mapping() {
     data_type: $("dtype").value,
     time_field: $("timef").value.trim() || null,
     poll_interval_s: kind === "stream" ? 1 : null,
+    license: $("license") ? $("license").value : "UNSPECIFIED",
   };
 }
 
