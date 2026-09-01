@@ -1,0 +1,8 @@
+{
+  "demo_only": true,
+  "listings": [
+    "demo-station",
+    "demo-sim-battery",
+    "demo-text-claim"
+  ]
+}

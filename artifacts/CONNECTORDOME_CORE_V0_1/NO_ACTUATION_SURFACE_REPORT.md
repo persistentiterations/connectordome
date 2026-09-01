@@ -1,0 +1,7 @@
+# No actuation surface
+
+LIVE ACTUATION: NONE
+MUTATING OPERATIONS EXPOSED: NONE
+
+Generated connectors advertise GET/HEAD only.
+OpenAPI POST/PUT/PATCH/DELETE are EXCLUDED — MUTATING OPERATION.

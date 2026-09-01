@@ -1,0 +1,127 @@
+:root {
+  --bg: #0e0e0e;
+  --panel: #171717;
+  --line: #2c2c2c;
+  --text: #ece8e0;
+  --mut: #9a958c;
+  --acc: #c4a574;
+  --hold: #d4a574;
+  --pass: #b7c4a1;
+  --focus: #e8dcc8;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--text); }
+body {
+  font: 16px/1.45 "Segoe UI", system-ui, sans-serif;
+  max-width: 52rem;
+  margin: 0 auto;
+  padding: 1rem 1.1rem 3rem;
+}
+a { color: var(--acc); text-decoration: underline; text-underline-offset: 2px; }
+a:hover { color: var(--focus); }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+header.site {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: .6rem;
+}
+.brand { font-family: ui-monospace, "Cascadia Code", Consolas, monospace; letter-spacing: .08em; font-size: .95rem; }
+.brand small { display: block; color: var(--mut); letter-spacing: 0; font-size: .72rem; margin-top: .15rem; }
+nav a { margin-left: .85rem; font-size: .9rem; }
+h1 { font-size: 1.65rem; font-weight: 600; margin: 1.2rem 0 .4rem; }
+h2 { font-size: 1.05rem; font-weight: 600; margin: 1.3rem 0 .4rem; letter-spacing: .02em; }
+p.lead { color: var(--mut); margin: 0 0 1rem; }
+.rule {
+  font-family: ui-monospace, Consolas, monospace;
+  border: 1px solid var(--line);
+  padding: .7rem .85rem;
+  margin: 1rem 0;
+  background: var(--panel);
+}
+.actions a.btn, button.btn, .actions a {
+  display: inline-block;
+  margin: 0 .8rem .6rem 0;
+}
+a.primary, button.primary {
+  background: var(--panel);
+  border: 1px solid var(--acc);
+  color: var(--text);
+  padding: .35rem .7rem;
+  text-decoration: none;
+  font: inherit;
+  cursor: pointer;
+}
+a.primary:hover, button.primary:hover { background: #1f1c18; }
+.steps { display: grid; grid-template-columns: 1fr; gap: .6rem; margin: 1rem 0 1.4rem; }
+@media (min-width: 720px) { .steps { grid-template-columns: 1fr 1fr 1fr; } }
+.step {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  padding: .7rem .8rem;
+}
+.step b { font-family: ui-monospace, Consolas, monospace; color: var(--acc); }
+label { display: block; font-size: .82rem; color: var(--mut); margin: .6rem 0 .2rem; }
+input, select, textarea {
+  width: 100%;
+  background: #111;
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 0;
+  padding: .4rem .45rem;
+  font: 15px ui-monospace, Consolas, monospace;
+}
+textarea { min-height: 4.5rem; }
+.kinds { display: grid; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); gap: .4rem; }
+.kind {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  padding: .7rem .6rem;
+  text-align: left;
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+}
+.kind[aria-pressed="true"] { border-color: var(--acc); }
+.kind small { display: block; color: var(--mut); font-size: .75rem; }
+table { width: 100%; border-collapse: collapse; font-size: .92rem; }
+th, td { border-bottom: 1px solid var(--line); text-align: left; padding: .35rem .3rem; vertical-align: top; }
+th { color: var(--mut); font-weight: 500; }
+.status { font-family: ui-monospace, Consolas, monospace; font-size: .8rem; color: var(--mut); }
+.split { display: grid; gap: .8rem; }
+@media (min-width: 800px) { .split { grid-template-columns: 1fr 1fr; } }
+pre {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  padding: .7rem;
+  overflow: auto;
+  font-size: .78rem;
+  white-space: pre-wrap;
+}
+.fields button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  color: var(--text);
+  font: 14px ui-monospace, Consolas, monospace;
+  padding: .3rem 0;
+  cursor: pointer;
+}
+footer {
+  margin-top: 2.5rem;
+  border-top: 1px solid var(--line);
+  padding-top: .8rem;
+  color: var(--mut);
+  font-size: .85rem;
+}
+footer nav a { margin: 0 .7rem 0 0; }
+.hold { color: var(--hold); }
+.pass { color: var(--pass); }
+.note { color: var(--mut); font-size: .88rem; }
+hr { border: 0; border-top: 1px solid var(--line); margin: 1.2rem 0; }
+.crumb { color: var(--mut); font-size: .85rem; }

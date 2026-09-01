@@ -1,0 +1,40 @@
+{
+  "name": "CONNECTORDOME_CORE_V0_1",
+  "created_at": "2026-09-01T01:14:12.751Z",
+  "tests_returncode": 0,
+  "files": {
+    "CANONICAL_BUILD_DEMO.json": "e4a5bb7d8e518ef2a46a097a7819417d84d09d6810a0ae2b59c865c1f0abf18f",
+    "CONNECTOR_PACKAGE_SPEC.json": "cea171d1163661d233064ef9431dd47413e8968e67d5438e68e5bdc2280a3776",
+    "DEPLOYMENT_RECEIPT.json": "093bf406b12e3df44c4f7e3e7ec5730786881088b443a263c7544e220789918d",
+    "DNS_RECEIPT.json": "5f0e832ac5807b80543adfc645433a96dbe254b4f0a10a823e3f7e15cf012c1a",
+    "EMAIL_ROUTING_RECEIPT.json": "d3f65359889928de0868766862839f081c294cc6e3a78fcb0055d2a09b567308",
+    "KNOWN_LIMITATIONS.md": "c8cd3b03eae2ff0a6164f1c71d7cc81e9334489d2487e5ae33c3e93745e480b4",
+    "NO_ACTUATION_SURFACE_REPORT.md": "24d008539245fac5a44c952ac7a6921c95575db4fb57998cc7f3f78702979126",
+    "REGISTRY_WITNESS.json": "60c765aa30af844cc7e0ad5124f665361faebd74ba5f5ae0888974ecd5f7f783",
+    "SECURITY_RECEIPT.json": "4fe0dc3d419e97341d3da036d5f4f664bb7e24f341fc0e46e5ed9cbc8ce5d86f",
+    "TEST_RECEIPT.json": "a8684af690bf60aa7f61dc625172f7fb81ccc650b0c481a66937a87eb8c12fd7",
+    "VERIFIER_RECEIPT.json": "03556b0cb98e2cd013b17a7da7ff85f8951e8f83689d49b945dca665853b3d50"
+  },
+  "openapi_demo": {
+    "title": "OpenAPI",
+    "version": null,
+    "included": [
+      {
+        "method": "GET",
+        "path": "/x",
+        "operationId": null,
+        "summary": ""
+      }
+    ],
+    "excluded": [
+      {
+        "method": "POST",
+        "path": "/x",
+        "operationId": null,
+        "summary": "",
+        "reason": "EXCLUDED — MUTATING OPERATION"
+      }
+    ],
+    "mutating_operations_exposed": false
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "public_site": "https://connectordome.com",
+  "www": "https://www.connectordome.com -> 301 https://connectordome.com/",
+  "workers_dev": "https://connectordome.flexpadm.workers.dev",
+  "worker": "connectordome",
+  "https": "PASS",
+  "paid_resources": "NONE"
+}

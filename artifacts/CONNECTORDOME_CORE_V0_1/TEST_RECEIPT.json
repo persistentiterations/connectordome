@@ -1,0 +1,7 @@
+{
+  "returncode": 0,
+  "stdout": "✔ homepage copy (1.1985ms)\n✔ JSON source parsing (0.3417ms)\n✔ OpenAPI read vs mutate (0.2653ms)\n✔ mapping and ReceptorEvent REMOTE_FEED (8.2582ms)\n✔ SIMULATION provenance (1.0049ms)\n✔ TEXT_CLAIM provenance (0.7241ms)\n✔ TEST_FIXTURE provenance (0.486ms)\n✔ remote cannot claim LIVE_LOCAL (0.4339ms)\n✔ read-only enforcement (0.5903ms)\n✔ secret redaction (0.3389ms)\n✔ SSRF protection (0.6453ms)\n✔ schema drift does not fabricate (0.1538ms)\n✔ source unavailable inspect (18.3563ms)\n✔ timestamp separation (1.9846ms)\n✔ unit transformation receipt stays explicit (1.6244ms)\n✔ package generation hash and verify (3.4098ms)\n✔ generated adapter SCHEMA_DRIFT and UNAVAILABLE (4.2943ms)\n✔ registry demo only (0.1908ms)\n✔ no actuation surface in source (3.0591ms)\n✔ suggestions are not authority (0.1851ms)\n✔ event identity stable (1.5606ms)\n✔ required provenance modes exist (0.1799ms)\n✔ builder html exists (0.3317ms)\nℹ tests 23\nℹ suites 0\nℹ pass 23\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 129.7586\n",
+  "stderr": "",
+  "python": null,
+  "node": "v24.13.0"
+}

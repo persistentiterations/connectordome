@@ -1,0 +1,11 @@
+{
+  "enabled": true,
+  "status": "ready",
+  "catch_all": "enabled",
+  "action": "forward",
+  "destination_verified": true,
+  "destination": "ceo@bonacqui.com",
+  "public_contact": "hello@connectordome.com",
+  "loop": false,
+  "note": "Destination mailbox is not shown in public UI."
+}

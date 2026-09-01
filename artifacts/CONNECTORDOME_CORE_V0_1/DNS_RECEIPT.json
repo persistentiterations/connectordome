@@ -1,0 +1,20 @@
+{
+  "zone": "connectordome.com",
+  "zone_status": "active",
+  "nameservers": [
+    "henry.ns.cloudflare.com",
+    "ryleigh.ns.cloudflare.com"
+  ],
+  "worker_custom_domains": [
+    "connectordome.com",
+    "www.connectordome.com"
+  ],
+  "email_mx": [
+    "route1.mx.cloudflare.net",
+    "route2.mx.cloudflare.net",
+    "route3.mx.cloudflare.net"
+  ],
+  "spf": "v=spf1 include:_spf.mx.cloudflare.net ~all",
+  "dkim": "cf2024-1._domainkey.connectordome.com TXT present",
+  "other_zones_modified": "NONE"
+}

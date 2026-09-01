@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Build a connector — ConnectorDome</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="site">
+    <div class="brand">CONNECTORDOME<small>ASF connector registry + builder</small></div>
+    <nav>
+      <a href="/">home</a>
+      <a href="/build">build</a>
+      <a href="/connectors">connectors</a>
+      <a href="/asf">asf</a>
+    </nav>
+  </header>
+  <p class="crumb"><a href="/">home</a> / build</p>
+  <h1>Build a connector</h1>
+  <p class="lead">What are you connecting? No login. Observation only.</p>
+
+  <div class="kinds" id="kinds">
+    <button class="kind" data-kind="web_api" aria-pressed="true">WEB API<small>Paste a URL</small></button>
+    <button class="kind" data-kind="openapi">OPENAPI<small>Read-only ops</small></button>
+    <button class="kind" data-kind="stream">STREAM<small>Polled snapshot</small></button>
+    <button class="kind" data-kind="mqtt" disabled>MQTT<small>coming next</small></button>
+    <button class="kind" data-kind="simulator">SIMULATOR<small>Seeded values</small></button>
+    <button class="kind" data-kind="text_claim">TEXT CLAIM<small>Not a sensor</small></button>
+    <button class="kind" data-kind="advanced">ADVANCED<small>JSON mapping</small></button>
+  </div>
+
+  <label for="desc">Describe what you want to connect <span class="note">(optional — suggestions are not authority)</span></label>
+  <textarea id="desc" placeholder='e.g. "NOAA weather readings for Cleveland"'></textarea>
+  <p><button class="primary" type="button" id="suggest">Suggest mappings</button></p>
+  <pre id="suggest-out" hidden></pre>
+
+  <div id="oa-box" hidden>
+    <label for="oaspec">OpenAPI JSON</label>
+    <textarea id="oaspec" placeholder='{"openapi":"3.0.0","paths":{"/data":{"get":{},"post":{}}}}'></textarea>
+    <p><button class="primary" type="button" id="classify">Classify operations</button></p>
+    <pre id="oa-out" hidden></pre>
+  </div>
+  <div id="url-box">
+    <label for="url">Paste a URL</label>
+    <input id="url" placeholder="https://connectordome.com/fixtures/demo-station.json" value="/fixtures/demo-station.json">
+    <p class="note">Try the demo fixture, or paste any public HTTPS JSON URL. Private/LAN/metadata destinations are blocked.</p>
+    <p>
+      <button class="primary" type="button" id="inspect">Inspect</button>
+      <button type="button" class="primary" id="demo">Use demo source</button>
+    </p>
+  </div>
+
+  <div id="inspect-out" hidden></div>
+  <div id="map-box" hidden>
+    <h2>2 · Map</h2>
+    <label for="field">Field</label>
+    <input id="field" placeholder="temperature">
+    <label for="capability">Capability</label>
+    <input id="capability" placeholder="weather.air.temperature">
+    <label for="units">Unit</label>
+    <input id="units" placeholder="C">
+    <label for="dtype">Data type</label>
+    <select id="dtype"><option>number</option><option>string</option><option>boolean</option><option>object</option></select>
+    <label for="timef">Observation time field</label>
+    <input id="timef" placeholder="observed_at">
+    <label for="name">Connector name</label>
+    <input id="name" value="demo-station">
+    <p>
+      <button class="primary" type="button" id="preview">Preview ASF event</button>
+    </p>
+  </div>
+
+  <div id="preview-box" hidden>
+    <h2>Preview</h2>
+    <div class="split">
+      <div><h2>RAW</h2><pre id="raw"></pre></div>
+      <div><h2>ASF</h2><pre id="asf"></pre></div>
+    </div>
+    <p>
+      <button class="primary" type="button" id="build">Build connector</button>
+    </p>
+  </div>
+
+  <div id="result-box" hidden>
+    <h2>3 · Use</h2>
+    <pre id="checks"></pre>
+    <p id="verdict"></p>
+    <p><button class="primary" type="button" id="download">Download connector</button></p>
+    <p class="note">The zip runs without connectordome.com. No phone-home. No secrets inside.</p>
+  </div>
+
+  <footer>
+    <div>ConnectorDome · BonAcqui LLC</div>
+    <nav><a href="mailto:hello@connectordome.com">hello@connectordome.com</a></nav>
+  </footer>
+  <script src="/builder.js"></script>
+</body>
+</html>

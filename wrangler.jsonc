@@ -1,0 +1,20 @@
+{
+  "name": "connectordome",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-08-01",
+  "account_id": "ae23bc612ecaa4ebbca2740eae4b5639",
+  "workers_dev": true,
+  "preview_urls": true,
+  "routes": [
+    { "pattern": "connectordome.com", "custom_domain": true },
+    { "pattern": "www.connectordome.com", "custom_domain": true }
+  ],
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "404-page",
+    "run_worker_first": true
+  },
+  "observability": { "enabled": true }
+}

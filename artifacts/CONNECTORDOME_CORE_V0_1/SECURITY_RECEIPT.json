@@ -1,0 +1,6 @@
+{
+  "ssrf": "blocks localhost, RFC1918, link-local, metadata, http credentials",
+  "secrets_in_packages": "NONE",
+  "mutating_default": "GET only",
+  "actuation": "NONE"
+}

@@ -1,0 +1,12 @@
+node_modules/
+.wrangler/
+.dev.vars
+.env
+.env.*
+!.env.example
+dist/
+*.zip
+!fixtures/*.json
+.DS_Store
+coverage/
+data-m0/

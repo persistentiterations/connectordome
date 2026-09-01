@@ -1,0 +1,52 @@
+{
+  "status": "CONFORMANCE_PASS",
+  "checks": [
+    {
+      "id": "manifest",
+      "result": "PASS",
+      "detail": "name, source_kind, capabilities"
+    },
+    {
+      "id": "read-only",
+      "result": "PASS",
+      "detail": "GET/HEAD only; actuation NONE"
+    },
+    {
+      "id": "provenance",
+      "result": "PASS",
+      "detail": "REMOTE_FEED matches web_api"
+    },
+    {
+      "id": "units",
+      "result": "PASS",
+      "detail": "each capability declares units (may be null)"
+    },
+    {
+      "id": "timestamps",
+      "result": "PASS",
+      "detail": "source/received/ingested remain separate"
+    },
+    {
+      "id": "source unavailable handling",
+      "result": "PASS",
+      "detail": "missing source is UNAVAILABLE, not invented"
+    },
+    {
+      "id": "no embedded secrets",
+      "result": "PASS",
+      "detail": "secret_ref only"
+    },
+    {
+      "id": "no execution surface",
+      "result": "PASS",
+      "detail": "no shell/POST/actuate"
+    },
+    {
+      "id": "action_authority",
+      "result": "PASS",
+      "detail": "NONE"
+    }
+  ],
+  "mutating_operations_exposed": [],
+  "live_actuation": "NONE"
+}

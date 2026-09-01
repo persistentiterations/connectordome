@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Connectors — ConnectorDome</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="site">
+    <div class="brand">CONNECTORDOME<small>ASF connector registry + builder</small></div>
+    <nav>
+      <a href="/">home</a>
+      <a href="/build">build</a>
+      <a href="/connectors">connectors</a>
+      <a href="/asf">asf</a>
+    </nav>
+  </header>
+  <p class="crumb"><a href="/">home</a> / connectors</p>
+  <h1>Connectors</h1>
+  <p class="lead">Demonstration listings only. This is not a manufactured ecosystem.</p>
+  <label for="q">Search</label>
+  <input id="q" placeholder="name, source, capability">
+  <label for="cat">Category</label>
+  <select id="cat">
+    <option value="">All</option>
+  </select>
+  <table>
+    <thead>
+      <tr><th>NAME</th><th>SOURCE</th><th>TYPE</th><th>CAPABILITIES</th><th>STATUS</th><th>VERSION</th></tr>
+    </thead>
+    <tbody id="rows"></tbody>
+  </table>
+  <footer>
+    <div>ConnectorDome · BonAcqui LLC</div>
+    <nav><a href="mailto:hello@connectordome.com">Contact</a></nav>
+  </footer>
+  <script>
+    const cats = ["Industrial","Weather","Earth","Space","Energy","Telecom","Vehicles","Laboratory","Agriculture","Buildings","Computing","Public Data","Simulation","Other"];
+    const sel = document.getElementById("cat");
+    cats.forEach(c => { const o=document.createElement("option"); o.value=c; o.textContent=c; sel.appendChild(o); });
+    async function load() {
+      const q = document.getElementById("q").value;
+      const category = sel.value;
+      const r = await fetch("/api/registry?q=" + encodeURIComponent(q) + "&category=" + encodeURIComponent(category));
+      const j = await r.json();
+      const tb = document.getElementById("rows");
+      tb.innerHTML = (j.connectors||[]).map(c => `<tr>
+        <td><a href="/connectors/${c.id}">${c.name}</a></td>
+        <td>${c.source}</td><td>${c.type}</td>
+        <td>${c.capabilities.join(", ")}</td>
+        <td>${c.status}</td><td>${c.version}</td>
+      </tr>`).join("") || "<tr><td colspan=6>none</td></tr>";
+    }
+    document.getElementById("q").addEventListener("input", load);
+    sel.addEventListener("change", load);
+    load();
+  </script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+{
+  "files": [
+    "manifest.json",
+    "adapter.mjs",
+    "tests/test_adapter.mjs",
+    "README.md",
+    "LICENSE_HOLD.md",
+    "example-event.json",
+    "mapping.json",
+    "inspection-meta.json"
+  ],
+  "manifest": {
+    "name": "demo-station",
+    "version": "0.1.0",
+    "publisher": "guest",
+    "category": "Other",
+    "source_kind": "web_api",
+    "source_url": null,
+    "source_host": "/fixtures/demo-station.json",
+    "http_methods": [
+      "GET"
+    ],
+    "actuation": "NONE",
+    "read_only": true,
+    "provenance_mode": "REMOTE_FEED",
+    "asf_compatibility": "ASF ReceptorEvent v0.1 / post-v0.1 TEST_FIXTURE",
+    "capabilities": [
+      {
+        "capability_id": "weather.air.temperature",
+        "field": "temperature",
+        "units": "C",
+        "data_type": "number",
+        "time_field": "observed_at"
+      }
+    ],
+    "sampling_semantics": "polled_snapshot",
+    "poll_interval_s": null,
+    "unavailable_behavior": "UNAVAILABLE",
+    "no_fabrication": true,
+    "secret_ref": null,
+    "description": "canonical demo",
+    "demo": true,
+    "verification": "pending"
+  },
+  "runtime_independence": true,
+  "phone_home": false
+}

@@ -1,0 +1,68 @@
+{
+  "source": "/fixtures/demo-station.json",
+  "inspection": {
+    "source": "/fixtures/demo-station.json",
+    "reachability": "OK",
+    "fields": [
+      {
+        "path": "station_id",
+        "value": "CLE01",
+        "type": "string"
+      },
+      {
+        "path": "temperature",
+        "value": 22.4,
+        "type": "number"
+      },
+      {
+        "path": "humidity",
+        "value": 61,
+        "type": "number"
+      },
+      {
+        "path": "observed_at",
+        "value": "2026-08-31T12:00:00Z",
+        "type": "string"
+      },
+      {
+        "path": "published_at",
+        "value": "2026-08-31T12:00:05Z",
+        "type": "string"
+      }
+    ]
+  },
+  "preview": {
+    "event_id": "7027878755d85c942d7f11708f6a38b741429bc5268ad7622b0dc87d8a662fb5",
+    "source_id": "/fixtures/demo-station.json",
+    "device_id": "/fixtures/demo-station.json",
+    "capability_id": "weather.air.temperature",
+    "source_type": "web_api",
+    "modality": "thermal",
+    "observed_at_host": "2026-09-01T01:14:12.734Z",
+    "observed_at_device_monotonic": null,
+    "sequence": 1,
+    "value": 22.4,
+    "units": "C",
+    "adapter_id": "connectordome.generated",
+    "adapter_version": "0.1.0",
+    "source_health": "OK",
+    "provenance_mode": "REMOTE_FEED",
+    "origin_event_id": null,
+    "action_authority": "NONE",
+    "source_binding": null,
+    "transport": "https-get",
+    "acquisition": "GET",
+    "sampling_semantics": "polled_snapshot",
+    "source_observed_at": "2026-08-31T12:00:00Z",
+    "source_published_at": null,
+    "connector_received_at": "2026-09-01T01:14:12.733Z",
+    "asf_ingested_at": "2026-09-01T01:14:12.734Z",
+    "poll_interval_s": null,
+    "last_attempt_at": "2026-09-01T01:14:12.733Z",
+    "last_success_at": "2026-09-01T01:14:12.733Z",
+    "missed_polls": 0
+  },
+  "status": "CONFORMANCE_PASS",
+  "package_hash": "413bb305b439c223c2a1eed572f1d4c439f02a7a60279163c0cbf2cf743716e7",
+  "check_text": "[PASS] manifest — name, source_kind, capabilities\n[PASS] read-only — GET/HEAD only; actuation NONE\n[PASS] provenance — REMOTE_FEED matches web_api\n[PASS] units — each capability declares units (may be null)\n[PASS] timestamps — source/received/ingested remain separate\n[PASS] source unavailable handling — missing source is UNAVAILABLE, not invented\n[PASS] no embedded secrets — secret_ref only\n[PASS] no execution surface — no shell/POST/actuate\n[PASS] action_authority — NONE"
+}
