@@ -22,16 +22,16 @@ found 0 vulnerabilities
 `npm test`
 
 ```text
-tests 58
-pass 58
+tests 59
+pass 59
 fail 0
 ```
 
-The repository count includes the acceptance test that decodes the actual API ZIP, independently checks every content hash and the declared digest scope, extracts to an operating-system temporary directory, imports and executes the adapter, injects invalid values, and invokes the packaged test command. Packaged output is required to contain `tests 5` and is rejected if it contains `tests 0`.
+The repository count includes the acceptance test that decodes the actual API ZIP, independently checks every content hash and the declared digest scope, extracts to an operating-system temporary directory, imports and executes the adapter, injects invalid values and impossible calendar dates, and invokes the packaged test command. Packaged output is required to contain `tests 6` and is rejected if it contains `tests 0`.
 
 `npm run acceptance`
 
-The runner starts Wrangler locally on loopback, checks `/health`, exercises `/api/preview` and `/api/build`, validates the ZIP and digest, runs the embedded-fixture adapter without ConnectorDome, forces a HOLD, and separately probes the real HTTPS fixture. The exact commit and hashes are machine-readable in `../artifacts/CONNECTORDOME_RELEASE_CANDIDATE_V0_1_2/ACCEPTANCE_RECEIPT.json`.
+The runner starts Wrangler locally on loopback, checks `/health`, exercises `/api/preview` and `/api/build`, validates the ZIP and digest, runs the embedded-fixture adapter without ConnectorDome, forces a HOLD, and separately probes the real HTTPS fixture. It writes `artifacts/CONNECTORDOME_RELEASE_CANDIDATE_V0_1_2/ACCEPTANCE_RECEIPT.json` as ignored external evidence. The receipt is uploaded by CI and records the exact release commit/tree; it is deliberately not committed because doing so would change the commit it claims to identify.
 
 `npx wrangler deploy --dry-run --outdir .wrangler-dry-run`
 

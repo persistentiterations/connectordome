@@ -188,6 +188,36 @@ test("invalid mapping declarations fail clearly", async () => {
   await assert.rejects(() => previewEvent({ inspection: insp({ n: 1, when: "not-a-time" }), mapping: { field: "n", capability: "count.n", data_type: "number", time_field: "when" }, kind: "web_api" }), /INVALID_TIMESTAMP/);
 });
 
+test("source timestamps require real calendar dates, clocks, and offsets", () => {
+  const valid = [
+    "2024-02-29T23:59:59Z",
+    "2000-02-29T00:00:00.123456Z",
+    "1900-02-28T12:30:45+05:30",
+    "2026-04-30T00:00:00-04:00",
+    "2026-12-31T23:59:59+14:00",
+    "2026-01-01T00:00:00-00:00",
+  ];
+  for (const timestamp of valid) assert.equal(parseSourceTime(timestamp), timestamp);
+
+  const invalid = [
+    "2026-02-29T12:00:00Z",
+    "2026-02-30T12:00:00Z",
+    "1900-02-29T12:00:00Z",
+    "2026-04-31T12:00:00Z",
+    "2026-00-01T12:00:00Z",
+    "2026-13-01T12:00:00Z",
+    "2026-01-00T12:00:00Z",
+    "2026-01-01T24:00:00Z",
+    "2026-01-01T23:60:00Z",
+    "2026-01-01T23:59:60Z",
+    "2026-01-01T12:00:00+14:01",
+    "2026-01-01T12:00:00+15:00",
+    "2026-01-01T12:00:00+05:60",
+    "2026-01-01T12:00:00",
+  ];
+  for (const timestamp of invalid) assert.throws(() => parseSourceTime(timestamp), /INVALID_TIMESTAMP/, timestamp);
+});
+
 test("literal dots in field names use escaped paths", () => {
   const body = { "sensor.temp": 18.5, nested: { "a.b": 2 } };
   assert.equal(getByPath(body, "sensor\\.temp"), 18.5);

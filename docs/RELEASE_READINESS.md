@@ -29,8 +29,8 @@ node src/cli.js inspect https://connectordome.com/fixtures/demo-station.json
 Expected evidence:
 
 - dependency audit: zero known vulnerabilities;
-- repository tests: 58 passed, 0 failed;
-- extracted package tests: 5 passed, 0 failed, never zero discovered;
+- repository tests: 59 passed, 0 failed;
+- extracted package tests: 6 passed, 0 failed, never zero discovered;
 - local Worker, guest build, ZIP extraction, adapter execution, HOLD gate: PASS;
 - Worker dry-run completes without uploading;
 - external HTTPS check is reported separately from deterministic local checks.
@@ -40,7 +40,7 @@ CI repeats this gate on Node 22 in `.github/workflows/release-acceptance.yml` an
 ## Authorized deployment checklist
 
 1. Require a green `release-acceptance` workflow on the exact commit.
-2. Review `artifacts/CONNECTORDOME_RELEASE_CANDIDATE_V0_1_2/ACCEPTANCE_RECEIPT.json` and match its commit and artifact hash.
+2. Download the CI/review `ACCEPTANCE_RECEIPT.json`; require `release_commit` to equal the exact deployment commit, `release_tree` to match its Git tree, and `tracked_worktree_clean` to be true.
 3. Confirm Cloudflare Web Analytics is disabled (or record an explicit policy exception); do not infer this from `wrangler.jsonc`.
 4. Capture the currently deployed Worker version/configuration for rollback.
 5. Deploy the exact reviewed commit only after explicit production approval.

@@ -46,6 +46,19 @@ import fs from "node:fs";
 import { sample, sampleFromBody, manifest } from "../adapter.mjs";
 const sampleBody = JSON.parse(fs.readFileSync(new URL("../sample-body.json", import.meta.url), "utf8"));
 const fixed = { receivedAt: "2026-01-01T00:00:01.000Z", ingestedAt: "2026-01-01T00:00:02.000Z", observedAtHost: "2026-01-01T00:00:02.000Z" };
+function pathParts(path) {
+  if (String(path).startsWith("/")) return String(path).slice(1).split("/").map((part) => part.replace(/~1/g, "/").replace(/~0/g, "~"));
+  const normalized = String(path).replace(/\\[(\\d+)\\]/g, ".$1");
+  const parts = []; let current = ""; let escaped = false;
+  for (const char of normalized) {
+    if (escaped) { current += char; escaped = false; continue; }
+    if (char === "\\\\") { escaped = true; continue; }
+    if (char === ".") { if (current) parts.push(current); current = ""; continue; }
+    current += char;
+  }
+  if (current) parts.push(current);
+  return parts;
+}
 
 test("manifest remains read-only", () => {
   assert.deepEqual(manifest.http_methods, ["GET"]);
@@ -76,6 +89,17 @@ test("packaged fixture executes without a service", async () => {
   if (manifest.source_kind !== "fixture") return;
   const event = await sample();
   assert.equal(event.provenance_mode, "TEST_FIXTURE");
+});
+
+test("impossible source calendar dates fail", async () => {
+  const timeField = manifest.capabilities[0].time_field;
+  if (!timeField) return;
+  const broken = structuredClone(sampleBody);
+  const parts = pathParts(timeField);
+  let target = broken;
+  for (const part of parts.slice(0, -1)) target = target[part];
+  target[parts.at(-1)] = "2026-02-30T12:00:00Z";
+  await assert.rejects(() => sampleFromBody(broken, fixed), /INVALID_TIMESTAMP/);
 });
 `;
 

@@ -64,7 +64,7 @@ test("guest demo builds, extracts, executes and tests cleanly", async (t) => {
   const packaged = spawnSync(process.execPath, ["--test", "tests/adapter.test.mjs"], { cwd: directory, encoding: "utf8", env: childEnv });
   const packagedOutput = packaged.stdout + packaged.stderr;
   assert.equal(packaged.status, 0, packagedOutput);
-  assert.match(packagedOutput, /tests 5/);
+  assert.match(packagedOutput, /tests 6/);
   assert.doesNotMatch(packagedOutput, /tests 0/);
 
   const runtimePath = path.join(directory, "runtime.mjs");
@@ -93,6 +93,17 @@ test("guest demo builds, extracts, executes and tests cleanly", async (t) => {
   assert.equal(event.action_authority, "NONE");
   assert.equal(event.missed_polls, null);
   assert.equal(event.event_id.length, 64);
+
+  for (const validTimestamp of ["2024-02-29T23:59:59Z", "2026-04-30T12:00:00-04:00", "2026-01-01T12:00:00+14:00"]) {
+    const body = JSON.parse(fixture);
+    body.observed_at = validTimestamp;
+    assert.equal((await adapter.sampleFromBody(body)).source_observed_at, validTimestamp);
+  }
+  for (const invalidTimestamp of ["2026-02-30T12:00:00Z", "2026-04-31T12:00:00Z", "2026-01-01T24:00:00Z", "2026-01-01T12:00:00+14:01"]) {
+    const body = JSON.parse(fixture);
+    body.observed_at = invalidTimestamp;
+    await assert.rejects(() => adapter.sampleFromBody(body), /INVALID_TIMESTAMP/);
+  }
 
   for (const bad of [null, "", " ", "not-a-number"]) {
     const body = JSON.parse(fixture);

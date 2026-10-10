@@ -95,7 +95,7 @@ try {
   const packaged = spawnSync(process.execPath, ["--test", "tests/adapter.test.mjs"], { cwd: temp, encoding: "utf8", env: cleanEnv });
   const packagedOutput = `${packaged.stdout}${packaged.stderr}`;
   assert.equal(packaged.status, 0, packagedOutput);
-  assert.match(packagedOutput, /tests 5/);
+  assert.match(packagedOutput, /tests 6/);
   const adapter = await import(`${pathToFileURL(path.join(temp, "adapter.mjs")).href}?acceptance`);
   const event = await adapter.sample();
   assert.equal(event.value, 22.4);
@@ -116,18 +116,24 @@ try {
     external.error = error instanceof Error ? error.message : String(error);
   }
 
-  const commit = spawnSync("git", ["rev-parse", "HEAD"], { cwd: root, encoding: "utf8" }).stdout.trim();
+  const releaseCommit = spawnSync("git", ["rev-parse", "HEAD"], { cwd: root, encoding: "utf8" }).stdout.trim();
+  const releaseTree = spawnSync("git", ["rev-parse", "HEAD^{tree}"], { cwd: root, encoding: "utf8" }).stdout.trim();
+  const trackedChanges = spawnSync("git", ["status", "--porcelain", "--untracked-files=no"], { cwd: root, encoding: "utf8" }).stdout.trim();
+  assert.equal(trackedChanges, "", `release acceptance requires a clean tracked worktree:\n${trackedChanges}`);
   const receipt = {
     schema: "connectordome.release-acceptance.v1",
     release: "0.1.2",
-    commit,
+    release_commit: releaseCommit,
+    release_tree: releaseTree,
+    tracked_worktree_clean: trackedChanges === "",
+    receipt_policy: "Generated after checkout and retained as external CI/review evidence; excluded from the release tree to avoid self-reference.",
     repository_tests: { status: "PASS", count: repositoryTestCount, command: "npm test" },
     local_worker: "PASS",
     guest_builder: "PASS",
     artifact_issued: true,
     artifact_sha256: build.package_hash,
     content_digest: build.content_digest,
-    packaged_tests: { status: "PASS", count: 5 },
+    packaged_tests: { status: "PASS", count: 6 },
     adapter_execution: "PASS",
     hold_gate: "PASS",
     phone_home_required: false,

@@ -5,7 +5,7 @@ import { getByPath } from "./inspect.js";
 export const DATA_TYPES = ["number", "string", "boolean", "object"];
 export const FRESHNESS_STATES = ["FRESH", "STALE", "HISTORICAL", "UNKNOWN"];
 const NUMERIC_TEXT = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/;
-const ISO_TIME = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/;
+const ISO_TIME = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.(\d+))?(Z|([+-])(\d{2}):(\d{2}))$/;
 
 export function observationError(code, message = code) {
   const error = new Error(`${code}: ${message}`);
@@ -44,11 +44,36 @@ export function normalizeObservation(raw, dataType) {
   return raw;
 }
 
+function isLeapYear(year) {
+  return year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+}
+
+function daysInMonth(year, month) {
+  if (month === 2) return isLeapYear(year) ? 29 : 28;
+  if ([4, 6, 9, 11].includes(month)) return 30;
+  return 31;
+}
+
 export function parseSourceTime(raw) {
   if (raw === undefined) throw observationError("SCHEMA_DRIFT", "configured time field missing");
   if (raw === null || (typeof raw === "string" && !raw.trim())) throw observationError("INVALID_TIMESTAMP", "configured time is empty");
   const text = String(raw);
-  if (!ISO_TIME.test(text) || !Number.isFinite(Date.parse(text))) throw observationError("INVALID_TIMESTAMP", "expected ISO 8601 timestamp with timezone");
+  const match = ISO_TIME.exec(text);
+  if (!match) throw observationError("INVALID_TIMESTAMP", "expected ISO 8601 timestamp with timezone");
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  const hour = Number(match[4]);
+  const minute = Number(match[5]);
+  const second = Number(match[6]);
+  const offsetHour = match[8] === "Z" ? 0 : Number(match[10]);
+  const offsetMinute = match[8] === "Z" ? 0 : Number(match[11]);
+  const validCalendar = month >= 1 && month <= 12 && day >= 1 && day <= daysInMonth(year, month);
+  const validClock = hour <= 23 && minute <= 59 && second <= 59;
+  const validOffset = offsetHour <= 14 && offsetMinute <= 59 && (offsetHour < 14 || offsetMinute === 0);
+  if (!validCalendar || !validClock || !validOffset || !Number.isFinite(Date.parse(text))) {
+    throw observationError("INVALID_TIMESTAMP", "timestamp contains an impossible calendar date, clock time, or UTC offset");
+  }
   return text;
 }
 
@@ -98,7 +123,7 @@ export async function createObservationEvent({ body, manifest, receivedAt = utcn
 
 // Generated packages receive this same source module, with imports rewritten locally.
 export function runtimeModuleSource() {
-  return `export const ACTION_AUTHORITY = "NONE";\nconst DATA_TYPES = ${JSON.stringify(DATA_TYPES)};\nconst IDENTITY_FIELDS = ${JSON.stringify(IDENTITY_FIELDS)};\nconst NUMERIC_TEXT = ${NUMERIC_TEXT};\nconst ISO_TIME = ${ISO_TIME};\nexport ${observationError.toString()}\n${normalizeObservation.toString()}\n${parseSourceTime.toString()}\n${classifyFreshness.toString()}\n${canonicalRuntime.toString()}\n${sha256Runtime.toString()}\n${parseFieldPathRuntime.toString()}\n${getByPathRuntime.toString()}\nexport ${createRuntimeEvent.toString()}\n`;
+  return `export const ACTION_AUTHORITY = "NONE";\nconst DATA_TYPES = ${JSON.stringify(DATA_TYPES)};\nconst IDENTITY_FIELDS = ${JSON.stringify(IDENTITY_FIELDS)};\nconst NUMERIC_TEXT = ${NUMERIC_TEXT};\nconst ISO_TIME = ${ISO_TIME};\nexport ${observationError.toString()}\n${normalizeObservation.toString()}\n${isLeapYear.toString()}\n${daysInMonth.toString()}\n${parseSourceTime.toString()}\n${classifyFreshness.toString()}\n${canonicalRuntime.toString()}\n${sha256Runtime.toString()}\n${parseFieldPathRuntime.toString()}\n${getByPathRuntime.toString()}\nexport ${createRuntimeEvent.toString()}\n`;
 }
 
 function canonicalRuntime(value) {
