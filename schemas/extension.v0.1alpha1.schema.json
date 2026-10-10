@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://connectordome.com/schemas/extension.v0.1alpha1.schema.json",
+  "title": "ConnectorDome third-party extension metadata",
+  "type": "object",
+  "required": ["api_version", "kind", "name", "version"],
+  "properties": {
+    "api_version": { "const": "connectordome.extension/v0.1alpha1" },
+    "kind": { "enum": ["adapter", "validator", "reasoning", "monitor"] },
+    "name": { "type": "string", "minLength": 1 },
+    "version": { "type": "string", "minLength": 1 },
+    "license": { "type": "string" },
+    "entrypoint": { "type": "string" }
+  }
+}

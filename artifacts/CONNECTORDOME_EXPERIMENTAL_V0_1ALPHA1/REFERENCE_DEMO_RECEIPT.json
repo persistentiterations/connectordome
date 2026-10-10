@@ -1,0 +1,62 @@
+{
+  "status": "PASS",
+  "phase": "DISSOLVED",
+  "reasons": [],
+  "receipts": [
+    {
+      "receipt_version": "connectordome.consequence-receipt/v0.1alpha1",
+      "receipt_id": "demo-run-001:sense",
+      "correlation_id": "demo-run-001",
+      "formation_id": "demo-sort-001",
+      "endpoint_id": "sensor-1",
+      "operation": "observe-item",
+      "proposed": true,
+      "permitted": true,
+      "attempted": true,
+      "reported_outcome": "COMPLETED",
+      "observed_consequence": { "item": "detected" },
+      "evidence_mode": "SIMULATION",
+      "uncertainty": null,
+      "observed_at": "2026-10-10T12:00:00.000Z",
+      "previous_receipt_hash": null,
+      "receipt_hash": "f72013126c3d020d8d6ea5b67e34f37ad5c2806f4019181faf7757b074cafdf4"
+    },
+    {
+      "receipt_version": "connectordome.consequence-receipt/v0.1alpha1",
+      "receipt_id": "demo-run-001:position",
+      "correlation_id": "demo-run-001",
+      "formation_id": "demo-sort-001",
+      "endpoint_id": "lift-1",
+      "operation": "position-item",
+      "proposed": true,
+      "permitted": true,
+      "attempted": true,
+      "reported_outcome": "COMPLETED",
+      "observed_consequence": { "position": "ready" },
+      "evidence_mode": "SIMULATION",
+      "uncertainty": null,
+      "observed_at": "2026-10-10T12:00:00.000Z",
+      "previous_receipt_hash": "f72013126c3d020d8d6ea5b67e34f37ad5c2806f4019181faf7757b074cafdf4",
+      "receipt_hash": "0556c07651f72e0f72b7323b3ed0ab3c37dbadc0329cb0dd4f1f93b41b695e95"
+    },
+    {
+      "receipt_version": "connectordome.consequence-receipt/v0.1alpha1",
+      "receipt_id": "demo-run-001:route",
+      "correlation_id": "demo-run-001",
+      "formation_id": "demo-sort-001",
+      "endpoint_id": "gate-1",
+      "operation": "route-item",
+      "proposed": true,
+      "permitted": true,
+      "attempted": true,
+      "reported_outcome": "COMPLETED",
+      "observed_consequence": { "route": "bin-a" },
+      "evidence_mode": "SIMULATION",
+      "uncertainty": null,
+      "observed_at": "2026-10-10T12:00:00.000Z",
+      "previous_receipt_hash": "0556c07651f72e0f72b7323b3ed0ab3c37dbadc0329cb0dd4f1f93b41b695e95",
+      "receipt_hash": "b050da3a7324d0a9c388df582f113dae873e9958164fd82fc6a7ff6f836412a0"
+    }
+  ],
+  "dissolved": true
+}

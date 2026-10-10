@@ -66,6 +66,20 @@ node src/cli.js package --kind web_api --url public/fixtures/demo-station.json -
 - Heuristic mapping suggestions are not authority
 - `CONFORMANCE_PASS` is not a safety certification
 
+## Experimental architecture (isolated)
+
+The production v0.1 path remains observation-only. A separate, disabled-by-default software simulation explores endpoint-local authority, temporary three-endpoint formations, and consequence receipts:
+
+```bash
+npm run demo:experimental
+```
+
+The demo has no device drivers, network transports, Worker routes, or physical output. Start with [`docs/ARCHITECTURAL_REVIEW.md`](docs/ARCHITECTURAL_REVIEW.md), then see the [capability contract](docs/CAPABILITY_CONTRACT.md), [formation protocol](docs/FORMATION_PROTOCOL.md), [receipts](docs/CONSEQUENCE_RECEIPTS.md), [safety boundary](docs/SAFETY_AND_AUTHORITY.md), and [interoperability matrix](docs/INTEROPERABILITY_MATRIX.md).
+
+## Open ecosystem
+
+Third parties can build adapters, validators, reasoning modules, and monitors against versioned Apache-2.0 contracts without permission from BonAcqui LLC. ConnectorDome has no required Fractalish, SymLan, ExoMCP, Anti-Illogical, advertising, account, telemetry, or proprietary dependency. See [`docs/ECOSYSTEM.md`](docs/ECOSYSTEM.md) for factual status labels and public project links.
+
 ## Privacy / terms / security
 
 - https://connectordome.com/privacy

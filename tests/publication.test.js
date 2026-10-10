@@ -90,3 +90,26 @@ test("steward wording", () => {
   assert.match(read("public/index.html"), /open-source project stewarded by BonAcqui LLC/);
   assert.match(read("NOTICE"), /BonAcqui LLC/);
 });
+
+test("open ecosystem wording stays factual and optional", () => {
+  const docs = read("public/docs.html");
+  assert.match(docs, /independently useful/i);
+  assert.match(docs, /no functioning integration/i);
+  assert.match(docs, /outside the immediate release scope/i);
+  const readme = read("README.md");
+  assert.match(readme, /disabled-by-default software simulation/i);
+  assert.match(readme, /no required Fractalish, SymLan, ExoMCP, Anti-Illogical/i);
+});
+
+test("versioned ecosystem schemas are valid JSON", () => {
+  for (const file of [
+    "schemas/capability.v0.1alpha1.schema.json",
+    "schemas/formation.v0.1alpha1.schema.json",
+    "schemas/consequence-receipt.v0.1alpha1.schema.json",
+    "schemas/extension.v0.1alpha1.schema.json",
+  ]) {
+    const schema = JSON.parse(read(file));
+    assert.equal(schema.$schema, "https://json-schema.org/draft/2020-12/schema");
+    assert.ok(schema.$id.includes("v0.1alpha1"));
+  }
+});
