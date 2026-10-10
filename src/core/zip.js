@@ -92,3 +92,27 @@ export function zipStore(files) {
   ]);
   return concat([...locals, centralDir, end]);
 }
+
+/** Extract ConnectorDome's deterministic STORE-only ZIPs for acceptance tests. */
+export function unzipStore(bytes) {
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  const decoder = new TextDecoder();
+  const files = {};
+  let offset = 0;
+  while (offset + 4 <= bytes.length && view.getUint32(offset, true) === 0x04034b50) {
+    const method = view.getUint16(offset + 8, true);
+    if (method !== 0) throw new Error("unsupported ZIP compression method");
+    const size = view.getUint32(offset + 18, true);
+    const nameLength = view.getUint16(offset + 26, true);
+    const extraLength = view.getUint16(offset + 28, true);
+    const nameStart = offset + 30;
+    const dataStart = nameStart + nameLength + extraLength;
+    const dataEnd = dataStart + size;
+    if (dataEnd > bytes.length) throw new Error("malformed ZIP entry");
+    const name = decoder.decode(bytes.slice(nameStart, nameStart + nameLength));
+    files[name] = bytes.slice(dataStart, dataEnd);
+    offset = dataEnd;
+  }
+  if (!Object.keys(files).length) throw new Error("no ZIP entries found");
+  return files;
+}

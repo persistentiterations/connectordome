@@ -51,6 +51,7 @@ export const IDENTITY_FIELDS = [
   "source_published_at",
   "connector_received_at",
   "asf_ingested_at",
+  "freshness_status",
 ];
 
 export async function assignEventId(event) {
@@ -116,7 +117,7 @@ export function receptorEvent(partial) {
     value: partial.value,
     units: partial.units ?? null,
     adapter_id: partial.adapter_id || "connectordome.generated",
-    adapter_version: partial.adapter_version || "0.1.0",
+    adapter_version: partial.adapter_version || "0.1.2",
     source_health: partial.source_health || "OK",
     provenance_mode: partial.provenance_mode,
     origin_event_id: partial.origin_event_id ?? null,
@@ -132,6 +133,8 @@ export function receptorEvent(partial) {
     poll_interval_s: partial.poll_interval_s ?? null,
     last_attempt_at: partial.last_attempt_at ?? null,
     last_success_at: partial.last_success_at ?? null,
-    missed_polls: partial.missed_polls ?? 0,
+    missed_polls: Object.prototype.hasOwnProperty.call(partial, "missed_polls") ? partial.missed_polls : null,
+    freshness_status: partial.freshness_status ?? "UNKNOWN",
+    freshness_threshold_s: partial.freshness_threshold_s ?? null,
   };
 }

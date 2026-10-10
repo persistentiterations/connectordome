@@ -24,8 +24,8 @@
   <div class="kinds" id="kinds">
     <button class="kind" data-kind="web_api" aria-pressed="true">WEB API<small>Paste a URL</small></button>
     <button class="kind" data-kind="openapi">OPENAPI<small>Read-only ops</small></button>
-    <button class="kind" data-kind="stream">STREAM<small>Polled snapshot</small></button>
-    <button class="kind" data-kind="mqtt" disabled>MQTT<small>coming next</small></button>
+    <button class="kind" data-kind="stream">POLLING<small>Repeated HTTPS snapshots; not sockets</small></button>
+    <button class="kind" data-kind="mqtt" disabled>MQTT<small>deferred; not implemented</small></button>
     <button class="kind" data-kind="simulator">SIMULATOR<small>Seeded values</small></button>
     <button class="kind" data-kind="text_claim">TEXT CLAIM<small>Not a sensor</small></button>
     <button class="kind" data-kind="advanced">ADVANCED<small>JSON mapping</small></button>
@@ -46,6 +46,7 @@
     <label for="url">Paste a URL</label>
     <input id="url" placeholder="https://connectordome.com/fixtures/demo-station.json" value="/fixtures/demo-station.json">
     <p class="note">Try the demo fixture, or paste any public HTTPS JSON URL. Private/LAN/metadata destinations are blocked.</p>
+    <p class="note">v0.1 reads JSON over HTTPS GET only. It is not a native PLC, camera, MQTT, industrial-bus, or video adapter.</p>
     <p>
       <button class="primary" type="button" id="inspect">Inspect</button>
       <button type="button" class="primary" id="demo">Use demo source</button>
@@ -95,7 +96,7 @@
     <h2>3 · Use</h2>
     <pre id="checks"></pre>
     <p id="verdict"></p>
-    <p><button class="primary" type="button" id="download">Download connector</button></p>
+    <p><button class="primary" type="button" id="download" disabled>Download verified connector</button></p>
     <p class="note">The zip runs without connectordome.com. No phone-home. No secrets inside.</p>
   </div>
 

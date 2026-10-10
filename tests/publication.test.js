@@ -51,6 +51,8 @@ test("guest package licensing metadata", async () => {
     fields: flattenFields(body),
     reachability: "OK",
     connector_received_at: "2026-08-31T12:00:10Z",
+    provenance_class: "REMOTE_FEED",
+    method: "GET",
   };
   const mapping = { field: "temperature", capability: "weather.air.temperature", units: "C", time_field: "observed_at" };
   const preview = await previewEvent({ inspection, mapping, kind: "web_api" });
@@ -70,7 +72,7 @@ test("guest package licensing metadata", async () => {
 
 test("chosen license is recorded not forced", async () => {
   const body = { n: 1 };
-  const inspection = { source: "sim", body, reachability: "OK", connector_received_at: "t" };
+  const inspection = { source: "sim", body, reachability: "OK", connector_received_at: "2026-08-31T12:00:10Z", provenance_class: "SIMULATION" };
   const mapping = { field: "n", capability: "count.n", units: "1", license: "MIT" };
   const preview = await previewEvent({ inspection, mapping, kind: "simulator" });
   const manifest = manifestFromBuild({ kind: "simulator", name: "s", inspection, mapping, description: "" });

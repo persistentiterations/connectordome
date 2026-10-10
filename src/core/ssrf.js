@@ -65,3 +65,11 @@ export function assertRedirectSafe(fromUrl, locationHeader) {
   }
   return next;
 }
+
+export function assertResolvedAddressesPublic(addresses) {
+  if (!Array.isArray(addresses) || addresses.length === 0) throw new Error("DNS_UNVERIFIED: resolver returned no addresses");
+  for (const address of addresses) {
+    if (hostnameBlocked(address)) throw new Error("SSRF_BLOCKED: DNS resolved to private or metadata destination");
+  }
+  return true;
+}

@@ -1,4 +1,5 @@
 import { ACTION_AUTHORITY, PROVENANCE_MODES, provenanceForSourceKind } from "./asf.js";
+import { DATA_TYPES } from "./observation.js";
 
 const FORBIDDEN_IN_PACKAGE = [
   "child_process",
@@ -24,12 +25,15 @@ export function verifyConnector({ manifest, files, preview }) {
   const mutating = methods.some((m) => ["POST", "PUT", "PATCH", "DELETE"].includes(m));
   add("read-only", !mutating && (manifest.actuation || "NONE") === "NONE", "GET/HEAD only; actuation NONE");
 
-  const expected = provenanceForSourceKind(manifest.source_kind);
+  const expected = provenanceForSourceKind(manifest.source_observed || manifest.source_kind);
   add(
     "provenance",
-    manifest.provenance_mode === expected && PROVENANCE_MODES.includes(manifest.provenance_mode),
-    `${manifest.provenance_mode} matches ${manifest.source_kind}`,
+    manifest.provenance_mode === expected && PROVENANCE_MODES.includes(manifest.provenance_mode) && manifest.provenance_observed === expected,
+    `${manifest.provenance_mode} checked against observed acquisition ${manifest.provenance_observed}`,
   );
+
+  add("capability identifiers", manifest.capabilities.every((c) => typeof c.capability_id === "string" && c.capability_id.trim()), "non-empty capability_id");
+  add("data types", manifest.capabilities.every((c) => DATA_TYPES.includes(c.data_type)), "declared types use the supported strict grammar");
 
   add(
     "units",
@@ -51,10 +55,18 @@ export function verifyConnector({ manifest, files, preview }) {
   const blob = Object.entries(files || {})
     .map(([n, c]) => `${n}\n${c}`)
     .join("\n");
-  const secretHit = /("?(api_key|token|password|secret)"?\s*:\s*"(?!secret_ref)[^"]{8,}")/i.test(blob);
+  const secretHit = /(?:api[_-]?key|access[_-]?token|refresh[_-]?token|password|client[_-]?secret|private[_-]?key)\s*[=:]\s*["'][^"']{6,}["']/i.test(blob);
   const forbiddenHit = FORBIDDEN_IN_PACKAGE.find((s) => blob.includes(s));
   add("no embedded secrets", !secretHit && !blob.includes("secret_value"), "secret_ref only");
   add("no execution surface", !forbiddenHit && !mutating, forbiddenHit ? `hit ${forbiddenHit}` : "no shell/POST/actuate");
+
+  const adapter = files?.["adapter.mjs"] || "";
+  const runtime = files?.["runtime.mjs"] || "";
+  const packageJson = files?.["package.json"] || "";
+  add("runtime contract", ["event_id", "source_id", "device_id", "source_observed_at", "connector_received_at", "asf_ingested_at", "source_health"].every((field) => runtime.includes(field)), "generated runtime emits the ASF identity and time contract");
+  add("test discovery", !!files?.["tests/adapter.test.mjs"] && packageJson.includes("tests/*.test.mjs"), "packaged tests are discoverable and non-empty");
+  add("portable source", manifest.source_kind !== "fixture" || (!!files?.["fixture.json"] && manifest.source_reference === "embedded:fixture.json"), "fixtures are embedded; remote URLs are explicit");
+  add("preview valid", !!preview?.asf && preview.schema_drift !== true, "the candidate preview is a valid observation event");
 
   if (manifest.secret_ref && manifest.secret_value) {
     checks.find((c) => c.id === "no embedded secrets").result = "HOLD";

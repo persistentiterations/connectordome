@@ -1,4 +1,5 @@
 const $ = (id) => document.getElementById(id);
+const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]);
 let kind = "web_api";
 let inspection = null;
 let lastBuild = null;
@@ -30,6 +31,12 @@ $("suggest").onclick = async () => {
     body: JSON.stringify({ description: $("desc").value }),
   });
   const j = await r.json();
+  if (!r.ok || j.status === "HOLD") {
+    inspection = null;
+    $("inspect-out").textContent = j.error || "Inspection failed";
+    $("map-box").hidden = true;
+    return;
+  }
   $("suggest-out").hidden = false;
   $("suggest-out").textContent = "SUGGESTION ONLY — not authority\n" + JSON.stringify(j, null, 2);
 };
@@ -71,17 +78,17 @@ $("inspect").onclick = async () => {
   const fields = (j.fields || [])
     .map(
       (f) =>
-        `<button type="button" data-path="${f.path}">${f.path}    ${JSON.stringify(f.value)}</button>`,
+        `<button type="button" data-path="${escapeHtml(f.path)}">${escapeHtml(f.path)}    ${escapeHtml(JSON.stringify(f.value))}</button>`,
     )
     .join("");
   $("inspect-out").innerHTML = `
     <h2>Inspection</h2>
     <table>
-      <tr><th>SOURCE</th><td>${j.source || ""}</td></tr>
-      <tr><th>CONTENT TYPE</th><td>${j.content_type || ""}</td></tr>
-      <tr><th>REACHABILITY</th><td>${j.reachability || j.error || ""}</td></tr>
-      <tr><th>RETRIEVAL TIME</th><td>${j.retrieval_time_ms ?? ""} ms</td></tr>
-      <tr><th>PROVENANCE CLASS</th><td>${j.provenance_class || ""}</td></tr>
+      <tr><th>SOURCE</th><td>${escapeHtml(j.source)}</td></tr>
+      <tr><th>CONTENT TYPE</th><td>${escapeHtml(j.content_type)}</td></tr>
+      <tr><th>REACHABILITY</th><td>${escapeHtml(j.reachability || j.error)}</td></tr>
+      <tr><th>RETRIEVAL TIME</th><td>${escapeHtml(j.retrieval_time_ms)} ms</td></tr>
+      <tr><th>PROVENANCE CLASS</th><td>${escapeHtml(j.provenance_class)}</td></tr>
     </table>
     <h2>Fields</h2>
     <div class="fields">${fields || "<p>none</p>"}</div>`;
@@ -115,11 +122,17 @@ $("preview").onclick = async () => {
       url: $("url").value.trim(),
       inspection,
       mapping: mapping(),
+      name: $("name").value.trim() || "connector",
       statement: $("desc").value,
     }),
   });
   const j = await r.json();
   $("preview-box").hidden = false;
+  if (!r.ok || j.status === "HOLD" || !j.asf) {
+    $("raw").textContent = JSON.stringify(j.raw ?? null, null, 2);
+    $("asf").textContent = j.error || "HOLD — preview did not produce a valid observation event";
+    return;
+  }
   $("raw").textContent = JSON.stringify(j.raw, null, 2);
   if (j.schema_drift) {
     $("asf").textContent = "SCHEMA_DRIFT\nMapped field missing. Value not fabricated.";
@@ -140,6 +153,8 @@ $("preview").onclick = async () => {
 };
 
 $("build").onclick = async () => {
+  lastBuild = null;
+  $("download").disabled = true;
   $("result-box").hidden = false;
   $("checks").textContent = "building…";
   const r = await fetch("/api/build", {
@@ -155,16 +170,16 @@ $("build").onclick = async () => {
     }),
   });
   const j = await r.json();
-  lastBuild = j;
   $("checks").textContent = j.check_text || JSON.stringify(j, null, 2);
   const ok = j.status === "CONFORMANCE_PASS";
   $("verdict").className = ok ? "pass" : "hold";
   $("verdict").textContent = ok ? "CONFORMANCE PASS" : "HOLD";
-  $("download").disabled = !ok && false;
+  if (ok && j.artifact_issued && j.zip_base64) lastBuild = j;
+  $("download").disabled = !lastBuild;
 };
 
 $("download").onclick = () => {
-  if (!lastBuild?.zip_base64) return;
+  if (lastBuild?.status !== "CONFORMANCE_PASS" || !lastBuild?.artifact_issued || !lastBuild?.zip_base64) return;
   const bin = Uint8Array.from(atob(lastBuild.zip_base64), (c) => c.charCodeAt(0));
   const blob = new Blob([bin], { type: "application/zip" });
   const a = document.createElement("a");
