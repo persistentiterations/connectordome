@@ -1,0 +1,27 @@
+{
+  "schema": "connectordome.release-acceptance.v1",
+  "release": "0.1.2",
+  "commit": "c3d5e3978734fb65a8a4e330c027de593ec5570e",
+  "repository_tests": {
+    "status": "PASS",
+    "count": 58,
+    "command": "npm test"
+  },
+  "local_worker": "PASS",
+  "guest_builder": "PASS",
+  "artifact_issued": true,
+  "artifact_sha256": "1861540d1168209636a72a5409347bac2694255a84e9c98097252f88f7384806",
+  "content_digest": "c731b697ae86fe636f621c2d4bec63a30a9726f65e70f77b8cf5fc0d91738e28",
+  "packaged_tests": {
+    "status": "PASS",
+    "count": 5
+  },
+  "adapter_execution": "PASS",
+  "hold_gate": "PASS",
+  "phone_home_required": false,
+  "external_https": {
+    "status": "EXTERNAL_PASS",
+    "url": "https://connectordome.com/fixtures/demo-station.json",
+    "http_status": 200
+  }
+}
