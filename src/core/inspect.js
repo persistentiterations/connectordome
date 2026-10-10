@@ -1,4 +1,4 @@
-import { assertPublicHttpsUrl, assertRedirectSafe } from "./ssrf.js";
+import { assertPublicHttpsUrl, assertRedirectSafe, assertResolvedAddressesPublic } from "./ssrf.js";
 import { utcnow } from "./asf.js";
 
 export function flattenFields(value, prefix = "", out = [], depth = 0) {
@@ -11,9 +11,9 @@ export function flattenFields(value, prefix = "", out = [], depth = 0) {
   if (t === "object" && !Array.isArray(value)) {
     const keys = Object.keys(value);
     if (!prefix) {
-      for (const k of keys) flattenFields(value[k], k, out, depth + 1);
+      for (const k of keys) flattenFields(value[k], escapePathSegment(k), out, depth + 1);
     } else {
-      for (const k of keys) flattenFields(value[k], `${prefix}.${k}`, out, depth + 1);
+      for (const k of keys) flattenFields(value[k], `${prefix}.${escapePathSegment(k)}`, out, depth + 1);
     }
     return out;
   }
@@ -26,19 +26,24 @@ export function flattenFields(value, prefix = "", out = [], depth = 0) {
   return out;
 }
 
-export async function inspectUrl(rawUrl, { fetchImpl = fetch, fixtureLoader = null } = {}) {
+export async function inspectUrl(rawUrl, { fetchImpl = fetch, fixtureLoader = null, resolveHost = null } = {}) {
   const received_at = utcnow();
   if (typeof rawUrl === "string" && (rawUrl.startsWith("/fixtures/") || rawUrl.startsWith("fixtures/"))) {
     if (!fixtureLoader) throw new Error("fixtureLoader required for local fixtures");
     const body = await fixtureLoader(rawUrl.replace(/^\//, ""));
-    const json = JSON.parse(body);
+    let json;
+    try { json = JSON.parse(body); }
+    catch {
+      return { source: rawUrl, source_reference: "embedded:fixture.json", content_type: "application/json", reachability: "MALFORMED_SOURCE", retrieval_time_ms: 0, provenance_class: "TEST_FIXTURE", error: "MALFORMED_SOURCE: fixture is not valid JSON", body: null, fields: [], connector_received_at: received_at, method: "GET" };
+    }
     return {
       source: rawUrl,
+      source_reference: "embedded:fixture.json",
       content_type: "application/json",
       reachability: "OK",
       retrieval_time_ms: 0,
-      provenance_class: "REMOTE_FEED",
-      note: "Same-origin fixture. Public demo data, not LIVE_LOCAL.",
+      provenance_class: "TEST_FIXTURE",
+      note: "Same-origin demonstration fixture; generated packages embed a copy.",
       body: json,
       fields: flattenFields(json),
       connector_received_at: received_at,
@@ -51,11 +56,16 @@ export async function inspectUrl(rawUrl, { fetchImpl = fetch, fixtureLoader = nu
   let current = url;
   let res = null;
   for (let hop = 0; hop < 4; hop++) {
-    res = await fetchImpl(current.href, {
-      method: "GET",
-      redirect: "manual",
-      headers: { Accept: "application/json, application/yaml, text/plain, */*;q=0.1" },
-    });
+    if (resolveHost) assertResolvedAddressesPublic(await resolveHost(current.hostname));
+    try {
+      res = await fetchImpl(current.href, {
+        method: "GET",
+        redirect: "manual",
+        headers: { Accept: "application/json, application/yaml, text/plain, */*;q=0.1" },
+      });
+    } catch {
+      return { source: current.hostname, url: current.href, content_type: null, reachability: "UNAVAILABLE", retrieval_time_ms: Date.now() - t0, provenance_class: "REMOTE_FEED", error: "source UNAVAILABLE (transport failure)", body: null, fields: [], connector_received_at: received_at, method: "GET" };
+    }
     if ([301, 302, 303, 307, 308].includes(res.status)) {
       const loc = res.headers.get("location");
       current = assertRedirectSafe(current, loc);
@@ -87,14 +97,26 @@ export async function inspectUrl(rawUrl, { fetchImpl = fetch, fixtureLoader = nu
       body = JSON.parse(text);
       fields = flattenFields(body);
     } catch {
-      fields = [{ path: "(raw)", value: text.slice(0, 500), type: "string" }];
+      return {
+        source: current.hostname,
+        url: current.href,
+        content_type,
+        reachability: "MALFORMED_SOURCE",
+        retrieval_time_ms,
+        provenance_class: "REMOTE_FEED",
+        error: "MALFORMED_SOURCE: response advertised or resembled JSON but could not be parsed",
+        body: null,
+        fields: [],
+        connector_received_at: received_at,
+        method: "GET",
+      };
     }
   } else {
     fields = [{ path: "(raw)", value: text.slice(0, 500), type: "string" }];
   }
   return {
-    source: url.hostname,
-    url: url.href,
+    source: current.hostname,
+    url: current.href,
     content_type,
     reachability: "OK",
     retrieval_time_ms,
@@ -108,11 +130,34 @@ export async function inspectUrl(rawUrl, { fetchImpl = fetch, fixtureLoader = nu
 
 export function getByPath(obj, path) {
   if (!path) return undefined;
-  const parts = path.replace(/\[(\d+)\]/g, ".$1").split(".").filter(Boolean);
+  const parts = parseFieldPath(path);
   let cur = obj;
   for (const p of parts) {
     if (cur == null || typeof cur !== "object" || !(p in cur)) return undefined;
     cur = cur[p];
   }
   return cur;
+}
+
+export function escapePathSegment(segment) {
+  return String(segment).replace(/\\/g, "\\\\").replace(/\./g, "\\.");
+}
+
+export function parseFieldPath(path) {
+  if (String(path).startsWith("/")) {
+    return String(path).slice(1).split("/").map((part) => part.replace(/~1/g, "/").replace(/~0/g, "~"));
+  }
+  const normalized = String(path).replace(/\[(\d+)\]/g, ".$1");
+  const parts = [];
+  let current = "";
+  let escaped = false;
+  for (const char of normalized) {
+    if (escaped) { current += char; escaped = false; continue; }
+    if (char === "\\") { escaped = true; continue; }
+    if (char === ".") { if (current) parts.push(current); current = ""; continue; }
+    current += char;
+  }
+  if (escaped) current += "\\";
+  if (current) parts.push(current);
+  return parts;
 }

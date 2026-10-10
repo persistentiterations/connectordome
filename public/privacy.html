@@ -19,7 +19,7 @@
   </header>
   <p class="crumb"><a href="/">home</a> / privacy</p>
   <h1>Privacy</h1>
-  <p class="lead">ConnectorDome is designed to collect and store as little as reasonably possible. This page describes v0.1 as implemented, not a generic SaaS template.</p>
+  <p class="lead">ConnectorDome is designed to collect and store as little as reasonably possible. This page describes the v0.1 product family and identifies the v0.1.2 release candidate configuration.</p>
 
   <div class="rule">
     DATA HANDLING — v0.1<br><br>
@@ -49,10 +49,10 @@
   <p>Guest builds are not automatically published. A future public listing may intentionally retain manifest, publisher identity, docs, version history, package hash, and test receipts because publication is meant to persist. That is opt-in and is not implemented in v0.1.</p>
 
   <h2>Infrastructure logging</h2>
-  <p>Cloudflare processes ordinary web-request metadata: IP address, request timing, URL path, status, and browser/network headers. Worker observability is enabled, so Cloudflare may retain operational logs. ConnectorDome does not claim that Cloudflare “sees nothing.”</p>
+  <p>Cloudflare processes ordinary web-request metadata: IP address, request timing, URL path, status, and browser/network headers. Worker observability is disabled in the v0.1.2 repository configuration. Zone-level Web Analytics is separate and must be verified before deployment; production may differ from this candidate. ConnectorDome does not claim that Cloudflare “sees nothing.”</p>
 
   <h2>Cookies</h2>
-  <p>No advertising or analytics cookies are intentionally set by ConnectorDome v0.1. The site does not load third-party analytics scripts.</p>
+  <p>No advertising or analytics cookies are intentionally set by ConnectorDome. The candidate source does not include analytics scripts, but Cloudflare can inject a Web Analytics beacon when the separate zone-level setting is enabled.</p>
 
   <h2>Contact</h2>
   <p><a href="mailto:privacy@connectordome.com">privacy@connectordome.com</a></p>

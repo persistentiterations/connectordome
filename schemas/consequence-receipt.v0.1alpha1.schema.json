@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://connectordome.com/schemas/consequence-receipt.v0.1alpha1.schema.json",
+  "title": "ConnectorDome experimental consequence receipt",
+  "type": "object",
+  "required": ["receipt_version", "receipt_id", "correlation_id", "formation_id", "endpoint_id", "operation", "proposed", "permitted", "attempted", "reported_outcome", "evidence_mode", "observed_at", "receipt_hash"],
+  "properties": {
+    "receipt_version": { "const": "connectordome.consequence-receipt/v0.1alpha1" },
+    "reported_outcome": { "type": "string" },
+    "observed_consequence": {},
+    "evidence_mode": { "enum": ["SIMULATION", "REPLAY", "REPORTED", "MEASURED"] },
+    "uncertainty": { "type": ["string", "null"] },
+    "previous_receipt_hash": { "type": ["string", "null"] },
+    "receipt_hash": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+  }
+}

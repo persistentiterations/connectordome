@@ -51,6 +51,8 @@ test("guest package licensing metadata", async () => {
     fields: flattenFields(body),
     reachability: "OK",
     connector_received_at: "2026-08-31T12:00:10Z",
+    provenance_class: "REMOTE_FEED",
+    method: "GET",
   };
   const mapping = { field: "temperature", capability: "weather.air.temperature", units: "C", time_field: "observed_at" };
   const preview = await previewEvent({ inspection, mapping, kind: "web_api" });
@@ -70,7 +72,7 @@ test("guest package licensing metadata", async () => {
 
 test("chosen license is recorded not forced", async () => {
   const body = { n: 1 };
-  const inspection = { source: "sim", body, reachability: "OK", connector_received_at: "t" };
+  const inspection = { source: "sim", body, reachability: "OK", connector_received_at: "2026-08-31T12:00:10Z", provenance_class: "SIMULATION" };
   const mapping = { field: "n", capability: "count.n", units: "1", license: "MIT" };
   const preview = await previewEvent({ inspection, mapping, kind: "simulator" });
   const manifest = manifestFromBuild({ kind: "simulator", name: "s", inspection, mapping, description: "" });
@@ -89,4 +91,27 @@ test("no phone-home or actuation regression", () => {
 test("steward wording", () => {
   assert.match(read("public/index.html"), /open-source project stewarded by BonAcqui LLC/);
   assert.match(read("NOTICE"), /BonAcqui LLC/);
+});
+
+test("open ecosystem wording stays factual and optional", () => {
+  const docs = read("public/docs.html");
+  assert.match(docs, /independently useful/i);
+  assert.match(docs, /no functioning integration/i);
+  assert.match(docs, /outside the immediate release scope/i);
+  const readme = read("README.md");
+  assert.match(readme, /disabled-by-default software simulation/i);
+  assert.match(readme, /no required Fractalish, SymLan, ExoMCP, Anti-Illogical/i);
+});
+
+test("versioned ecosystem schemas are valid JSON", () => {
+  for (const file of [
+    "schemas/capability.v0.1alpha1.schema.json",
+    "schemas/formation.v0.1alpha1.schema.json",
+    "schemas/consequence-receipt.v0.1alpha1.schema.json",
+    "schemas/extension.v0.1alpha1.schema.json",
+  ]) {
+    const schema = JSON.parse(read(file));
+    assert.equal(schema.$schema, "https://json-schema.org/draft/2020-12/schema");
+    assert.ok(schema.$id.includes("v0.1alpha1"));
+  }
 });

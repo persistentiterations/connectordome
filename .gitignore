@@ -1,5 +1,6 @@
 node_modules/
 .wrangler/
+.wrangler-dry-run/
 .dev.vars
 .env
 .env.*
@@ -10,3 +11,4 @@ dist/
 .DS_Store
 coverage/
 data-m0/
+/artifacts/CONNECTORDOME_RELEASE_CANDIDATE_V0_1_2/ACCEPTANCE_RECEIPT.json

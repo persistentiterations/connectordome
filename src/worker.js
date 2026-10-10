@@ -33,7 +33,7 @@ export default {
     }
 
     if (url.pathname === "/health") {
-      return json({ service: "connectordome", version: "0.1.0", actuation: "NONE" });
+      return json({ service: "connectordome", version: "0.1.2", release: "candidate", actuation: "NONE" });
     }
 
     if (url.pathname.startsWith("/api/")) {
@@ -85,9 +85,8 @@ async function handleApi(request, env, url) {
   if (url.pathname === "/api/preview" || url.pathname === "/api/build") {
     const kind = body.kind;
     if (!kind) return json({ error: "kind required" }, 400);
-    let inspection = body.inspection;
-    if (!inspection) {
-      if (kind === "simulator") {
+    let inspection;
+    if (kind === "simulator") {
         const b = simulationBody(body.seed);
         inspection = {
           source: "simulator",
@@ -114,10 +113,13 @@ async function handleApi(request, env, url) {
         inspection = await inspectUrl(body.url, { fixtureLoader: fixtureLoader(env) });
         if (inspection.reachability !== "OK") return json({ error: inspection.error || "UNAVAILABLE", inspection }, 409);
       } else {
-        return json({ error: "url or inspection required" }, 400);
+        return json({ error: "url required; client-supplied inspection is not an acquisition fact" }, 400);
       }
-    }
-    const mapping = body.mapping || {};
+    const mapping = {
+      ...(body.mapping || {}),
+      name: body.name || body.mapping?.name || "connector",
+      ...(kind === "simulator" ? { sim_seed: body.seed ?? 1 } : {}),
+    };
     const preview = await previewEvent({ inspection, mapping, kind });
     if (url.pathname === "/api/preview") return json(preview);
 
@@ -129,20 +131,27 @@ async function handleApi(request, env, url) {
       description: body.description || "",
     });
     const pkg = await buildPackage({ manifest, preview, mapping, inspection });
-    const zip_b64 = btoa(String.fromCharCode(...pkg.zip));
-    return json({
+    const issued = pkg.report.status === "CONFORMANCE_PASS" && pkg.zip;
+    const zip_b64 = issued ? btoa(String.fromCharCode(...pkg.zip)) : null;
+    const packagedManifest = issued ? JSON.parse(pkg.files["manifest.json"]) : pkg.manifest;
+    const result = {
       status: pkg.report.status,
       checks: pkg.report.checks,
       check_text: pkg.check_text,
-      manifest,
+      manifest: packagedManifest,
       preview,
-      package_hash: pkg.package_hash,
-      files: pkg.files,
-      zip_base64: zip_b64,
-      filename: `${pkg.name}-0.1.0.zip`,
+      package_hash: issued ? pkg.package_hash : null,
+      content_digest: issued ? pkg.content_digest : null,
+      filename: issued ? `${pkg.name}-0.1.2.zip` : null,
+      artifact_issued: !!issued,
       mutating_operations_exposed: pkg.report.mutating_operations_exposed,
       live_actuation: "NONE",
-    });
+    };
+    if (issued) {
+      result.files = pkg.files;
+      result.zip_base64 = zip_b64;
+    }
+    return json(result);
   }
 
   return json({ error: "unknown api" }, 404);

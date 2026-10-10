@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://connectordome.com/schemas/capability.v0.1alpha1.schema.json",
+  "title": "ConnectorDome experimental capability contract",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["contract_version", "endpoint_id", "owner_id", "capability_id", "operations", "constraints", "authority", "safety", "health", "revocation"],
+  "properties": {
+    "contract_version": { "const": "connectordome.capability/v0.1alpha1" },
+    "endpoint_id": { "type": "string", "minLength": 1 },
+    "owner_id": { "type": "string", "minLength": 1 },
+    "capability_id": { "type": "string", "minLength": 1 },
+    "operations": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+    "constraints": {
+      "type": "object",
+      "required": ["max_observation_age_ms"],
+      "properties": { "max_observation_age_ms": { "type": "integer", "minimum": 0 } }
+    },
+    "authority": {
+      "type": "object",
+      "required": ["mode", "default"],
+      "properties": { "mode": { "const": "LOCAL_EXPLICIT" }, "default": { "const": "DENY" } }
+    },
+    "safety": {
+      "type": "object",
+      "required": ["local_interlock", "safe_state"],
+      "properties": { "local_interlock": { "const": true }, "safe_state": { "type": "string" }, "blocked_operations": { "type": "array", "items": { "type": "string" } } }
+    },
+    "health": { "type": "object", "required": ["status"], "properties": { "status": { "enum": ["AVAILABLE", "DEGRADED", "UNAVAILABLE"] } } },
+    "revocation": { "type": "object", "required": ["supported"], "properties": { "supported": { "const": true } } }
+  }
+}

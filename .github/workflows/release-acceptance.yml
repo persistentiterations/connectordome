@@ -1,0 +1,32 @@
+name: release-acceptance
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run acceptance
+      - run: npx wrangler deploy --dry-run --outdir .wrangler-dry-run
+      - uses: actions/upload-artifact@v7
+        with:
+          name: connectordome-acceptance-evidence
+          path: |
+            artifacts/CONNECTORDOME_RELEASE_CANDIDATE_V0_1_2/ACCEPTANCE_RECEIPT.json
+            .wrangler-dry-run

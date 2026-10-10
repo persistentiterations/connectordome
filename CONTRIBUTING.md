@@ -19,4 +19,13 @@ Required for connector PRs:
 
 Do not add analytics, accounts, or phone-home runtime in v0.1-compatible patches unless the change is explicitly scoped and tested.
 
+Experimental extensions must remain under `src/experimental` or another explicitly isolated namespace, stay disabled by default, and include deterministic PASS/HOLD tests. Do not add live machinery or physical transports. Extension metadata uses `connectordome.extension/v0.1alpha1`; supported kinds are `adapter`, `validator`, `reasoning`, and `monitor`.
+
+Every contribution should include:
+
+- a declared license and provenance/evidence mode;
+- a minimal reproducible fixture or example;
+- tests covering refusal and failure, not only success;
+- documentation that labels functioning, experimental, planned, and research-only behavior separately.
+
 SPDX-License-Identifier: Apache-2.0
