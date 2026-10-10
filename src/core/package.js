@@ -29,11 +29,11 @@ export async function sample(fetchImpl = fetch) {
   if (!manifest.source_url) throw observationError("MALFORMED_CONFIGURATION", "source_url required for remote source");
   let response;
   try { response = await fetchImpl(manifest.source_url, { method: "GET", redirect: "error", headers: { Accept: "application/json" } }); }
-  catch (cause) { const error = observationError("UNAVAILABLE", "source request failed"); error.cause = cause; throw error; }
+  catch { throw observationError("UNAVAILABLE", "source request failed"); }
   if (!response?.ok) throw observationError("UNAVAILABLE", "source returned a non-success status");
   let body;
   try { body = await response.json(); }
-  catch (cause) { const error = observationError("MALFORMED_SOURCE", "response is not valid JSON"); error.cause = cause; throw error; }
+  catch { throw observationError("MALFORMED_SOURCE", "response is not valid JSON"); }
   return sampleFromBody(body, { receivedAt: attempt, ingestedAt: new Date().toISOString() });
 }
 
@@ -45,7 +45,6 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import { sample, sampleFromBody, manifest } from "../adapter.mjs";
 const sampleBody = JSON.parse(fs.readFileSync(new URL("../sample-body.json", import.meta.url), "utf8"));
-const fixed = { receivedAt: "2026-01-01T00:00:01.000Z", ingestedAt: "2026-01-01T00:00:02.000Z", observedAtHost: "2026-01-01T00:00:02.000Z" };
 function pathParts(path) {
   if (String(path).startsWith("/")) return String(path).slice(1).split("/").map((part) => part.replace(/~1/g, "/").replace(/~0/g, "~"));
   const normalized = String(path).replace(/\\[(\\d+)\\]/g, ".$1");
@@ -59,6 +58,13 @@ function pathParts(path) {
   if (current) parts.push(current);
   return parts;
 }
+function getPath(body, path) { let value = body; for (const part of pathParts(path)) value = value?.[part]; return value; }
+function deterministicTimes() {
+  const source = manifest.capabilities[0].time_field ? getPath(sampleBody, manifest.capabilities[0].time_field) : null;
+  const base = source && Number.isFinite(Date.parse(source)) ? Date.parse(source) : Date.parse("2026-01-01T00:00:00.000Z");
+  return { receivedAt: new Date(base + 1000).toISOString(), ingestedAt: new Date(base + 2000).toISOString(), observedAtHost: new Date(base + 2000).toISOString() };
+}
+const fixed = deterministicTimes();
 
 test("manifest remains read-only", () => {
   assert.deepEqual(manifest.http_methods, ["GET"]);
@@ -114,7 +120,7 @@ npm test
 node -e "import('./adapter.mjs').then(async m => console.log(await m.sample()))"
 \`\`\`
 
-Verify SHA-256 values in \`verification.json\` before use. The digest covers every package file except \`verification.json\`, avoiding circular hashing. This package contains no secrets by design; inspect it independently.
+Verify SHA-256 values in \`verification.json\` before use. The digest proves internal package integrity only when compared with trusted issuance evidence. It does not authenticate the publisher and cannot detect a fully re-signed forgery. This package contains no secrets by design; inspect it independently.
 `;
   const files = {
     "manifest.json": JSON.stringify(manifest, null, 2) + "\n",
@@ -167,7 +173,7 @@ export function manifestFromBuild({ kind, name, inspection, mapping, description
     capabilities: [{ capability_id: mapping.capability, field: mapping.field, units: mapping.units ?? null, data_type: mapping.data_type || "number", time_field: mapping.time_field || null, modality: mapping.modality || suggestion.modality }],
     transport: observedKind === "fixture" ? "embedded" : observedKind === "simulator" ? "none" : "https-get",
     acquisition: observedKind === "fixture" ? "embedded_fixture" : observedKind === "text_claim" ? "operator_text" : "GET",
-    sampling_semantics: "polled_snapshot", poll_interval_s: mapping.poll_interval_s ?? (kind === "stream" ? 1 : null), freshness_threshold_s: mapping.freshness_threshold_s ?? 300,
+    sampling_semantics: "polled_snapshot", poll_interval_s: mapping.poll_interval_s ?? (kind === "stream" ? 1 : null), freshness_threshold_s: mapping.freshness_threshold_s ?? 300, future_skew_tolerance_s: mapping.future_skew_tolerance_s ?? 60,
     observation_mode: observedKind === "fixture" ? "historical" : mapping.observation_mode || "current", unavailable_behavior: "UNAVAILABLE", no_fabrication: true,
     ...(observedKind === "simulator" ? { sim_seed: mapping.sim_seed ?? 1 } : {}),
     ...(observedKind === "text_claim" ? { statement: inspection?.body?.statement ?? null, claimed_value: inspection?.body?.claimed ?? null } : {}),

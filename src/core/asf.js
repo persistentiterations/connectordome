@@ -136,5 +136,6 @@ export function receptorEvent(partial) {
     missed_polls: Object.prototype.hasOwnProperty.call(partial, "missed_polls") ? partial.missed_polls : null,
     freshness_status: partial.freshness_status ?? "UNKNOWN",
     freshness_threshold_s: partial.freshness_threshold_s ?? null,
+    future_skew_tolerance_s: partial.future_skew_tolerance_s ?? null,
   };
 }

@@ -8,6 +8,7 @@ import { buildPackage, manifestFromBuild } from "./core/package.js";
 import { verifyConnector, formatCheckLines } from "./core/verify.js";
 import { suggestFromDescription } from "./core/suggest.js";
 import { canonical, sha256hex } from "./core/asf.js";
+import { pinnedHttpsFetch } from "./node/pinned-fetch.js";
 
 function help() {
   console.log(`dome — ConnectorDome CLI
@@ -53,6 +54,7 @@ async function cmdInspect(target) {
   }
   const result = await inspectUrl(target, {
     fixtureLoader: async (rel) => loadFixture(rel),
+    fetchImpl: pinnedHttpsFetch,
   });
   console.log(JSON.stringify(result, null, 2));
 }
@@ -81,7 +83,7 @@ async function cmdRun(argv, asPackage) {
       const body = JSON.parse(fs.readFileSync(url, "utf8"));
       inspection = { source: path.basename(url), source_reference: "local-file (embedded when packaged)", url: null, body, fields: flattenFields(body), reachability: "OK", provenance_class: "TEST_FIXTURE", connector_received_at: new Date().toISOString() };
     } else {
-      inspection = await inspectUrl(url.startsWith("http") ? url : url, { fixtureLoader: loadFixture });
+      inspection = await inspectUrl(url, { fixtureLoader: loadFixture, fetchImpl: pinnedHttpsFetch });
     }
   }
   const preview = await previewEvent({ inspection, mapping, kind: kind === "fixture" ? "fixture" : kind });
@@ -158,6 +160,10 @@ async function main(argv) {
     const manifest = JSON.parse(files["manifest.json"] || "null");
     const preview = { asf: JSON.parse(files["example-event.json"] || "null") };
     const report = verifyConnector({ manifest, files, preview });
+    if (evidence.status !== report.status) {
+      console.error(`HOLD: verification.json status ${evidence.status} disagrees with recomputed ${report.status}`);
+      process.exit(2);
+    }
     console.log(formatCheckLines(report));
     console.log("[PASS] content identity — verification.json matches extracted files");
     console.log(report.status);

@@ -102,6 +102,25 @@ try {
   assert.equal(event.action_authority, "NONE");
   assert.equal(event.provenance_mode, "TEST_FIXTURE");
 
+  const remoteRequest = { ...request, url: "https://raw.githubusercontent.com/persistentiterations/connectordome/main/public/fixtures/demo-station.json", name: "remote-demo-station" };
+  const remoteInspection = await post("/api/inspect", { url: remoteRequest.url });
+  assert.equal(remoteInspection.reachability, "OK");
+  assert.ok(Date.parse(remoteInspection.body.observed_at) > Date.parse("2026-01-01T00:00:00Z"));
+  remoteRequest.inspection = remoteInspection;
+  const remoteBuild = await post("/api/build", remoteRequest);
+  assert.equal(remoteBuild.status, "CONFORMANCE_PASS");
+  const remoteDir = fs.mkdtempSync(path.join(os.tmpdir(), "connectordome-remote-release-"));
+  try {
+    for (const [name, bytes] of Object.entries(unzipStore(Uint8Array.from(Buffer.from(remoteBuild.zip_base64, "base64"))))) { const target = path.join(remoteDir, ...name.split("/")); fs.mkdirSync(path.dirname(target), { recursive: true }); fs.writeFileSync(target, bytes); }
+    const remotePackaged = spawnSync(process.execPath, ["--test", "tests/adapter.test.mjs"], { cwd: remoteDir, encoding: "utf8", env: cleanEnv });
+    assert.equal(remotePackaged.status, 0, `${remotePackaged.stdout}${remotePackaged.stderr}`);
+    assert.match(`${remotePackaged.stdout}${remotePackaged.stderr}`, /tests 6/);
+    const remoteAdapter = await import(`${pathToFileURL(path.join(remoteDir, "adapter.mjs")).href}?acceptance`);
+    const remoteEvent = await remoteAdapter.sample();
+    assert.equal(remoteEvent.value, 22.4);
+    assert.equal(remoteEvent.provenance_mode, "REMOTE_FEED");
+  } finally { fs.rmSync(remoteDir, { recursive: true, force: true }); }
+
   const hold = await post("/api/build", { ...request, mapping: { ...request.mapping, field: "missing" } });
   assert.equal(hold.status, "HOLD");
   assert.equal(hold.artifact_issued, false);
@@ -133,11 +152,11 @@ try {
     artifact_issued: true,
     artifact_sha256: build.package_hash,
     content_digest: build.content_digest,
-    packaged_tests: { status: "PASS", count: 6 },
-    adapter_execution: "PASS",
+    packaged_tests: { embedded_fixture: { status: "PASS", count: 6 }, remote_https: { status: "PASS", count: 6 } },
+    adapter_execution: { embedded_fixture: "PASS", remote_https: "PASS" },
     hold_gate: "PASS",
     phone_home_required: false,
-    external_https: external,
+    external_https: { ...external, role: "external source/deployed-production observation only; not candidate deployment evidence" },
   };
   const evidenceDir = path.join(root, "artifacts", "CONNECTORDOME_RELEASE_CANDIDATE_V0_1_2");
   fs.mkdirSync(evidenceDir, { recursive: true });

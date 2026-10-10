@@ -63,7 +63,7 @@ node src/cli.js package --kind fixture --url public/fixtures/demo-station.json -
 node src/cli.js verify path/to/extracted-package
 ```
 
-Generated packages contain `verification.json`; its content digest covers every package file except `verification.json` itself. The enclosing ZIP has a separate SHA-256 hash in the build receipt.
+Generated packages contain `verification.json`; its content digest covers every package file except `verification.json` itself. The enclosing ZIP has a separate SHA-256 hash in the build receipt. These offline hashes establish internal integrity only when compared with trusted issuance evidence; they do not authenticate a publisher or resist an attacker who can replace and fully re-sign the package and receipt.
 
 Field paths use dots for nesting and backslash-escaped dots for literal key names: `machine.temperature` is nested, while `sensor\.temperature` addresses the literal key `sensor.temperature`. JSON Pointer syntax such as `/sensor.temperature` is also accepted.
 

@@ -12,7 +12,8 @@ import { verifyConnector } from "../src/core/verify.js";
 import { buildPackage, manifestFromBuild } from "../src/core/package.js";
 import { searchRegistry, getConnector } from "../src/core/registry.js";
 import { zipStore } from "../src/core/zip.js";
-import { normalizeObservation, parseSourceTime } from "../src/core/observation.js";
+import { normalizeObservation, parseSourceTime, classifyFreshness } from "../src/core/observation.js";
+import { resolvePinnedTarget, createPinnedHttpsFetch } from "../src/node/pinned-fetch.js";
 import { suggestFromDescription } from "../src/core/suggest.js";
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -173,6 +174,12 @@ test("SSRF protection", () => {
   assert.throws(() => assertResolvedAddressesPublic(["93.184.216.34", "127.0.0.1"]));
 });
 
+test("unquoted secret assignments force HOLD", () => {
+  const manifest = { name: "n", source_kind: "web_api", source_observed: "web_api", provenance_mode: "REMOTE_FEED", provenance_observed: "REMOTE_FEED", http_methods: ["GET"], actuation: "NONE", capabilities: [{ capability_id: "x", data_type: "number", units: null }], unavailable_behavior: "UNAVAILABLE", no_fabrication: true };
+  const preview = { asf: { source_observed_at: null, connector_received_at: "t", asf_ingested_at: "t", action_authority: "NONE" } };
+  for (const text of ["api_key=sk-live-SUPERSECRET123456", "password: hunter22222"]) assert.equal(verifyConnector({ manifest, files: { "README.md": text }, preview }).status, "HOLD");
+});
+
 test("strict numeric normalization never fabricates zero", () => {
   assert.equal(normalizeObservation(0, "number"), 0);
   assert.equal(normalizeObservation("12.5", "number"), 12.5);
@@ -277,6 +284,19 @@ test("timestamp separation", async () => {
   assert.equal(Object.prototype.hasOwnProperty.call(e, "timestamp"), false);
 });
 
+test("transport exceptions become structured UNAVAILABLE", async () => {
+  const result = await inspectUrl("https://example.org/data.json", { fetchImpl: async () => { throw new Error("provider reference 123"); } });
+  assert.equal(result.reachability, "UNAVAILABLE");
+  assert.equal(result.error, "source UNAVAILABLE (transport failure)");
+  assert.doesNotMatch(JSON.stringify(result), /provider reference/);
+});
+
+test("CLI DNS resolution rejects private and mixed answers", async () => {
+  await assert.rejects(() => resolvePinnedTarget("x.test", async () => [{ address: "10.0.0.8", family: 4 }]), /SSRF_BLOCKED/);
+  await assert.rejects(() => resolvePinnedTarget("x.test", async () => [{ address: "93.184.216.34", family: 4 }, { address: "127.0.0.1", family: 4 }]), /SSRF_BLOCKED/);
+  assert.deepEqual(await resolvePinnedTarget("x.test", async () => [{ address: "93.184.216.34", family: 4 }]), { address: "93.184.216.34", family: 4 });
+});
+
 test("DNS and redirect SSRF defenses use controlled fixtures", async () => {
   await assert.rejects(
     () => inspectUrl("https://public.example/data", { fetchImpl: async () => new Response("{}", { headers: { "content-type": "application/json" } }), resolveHost: async () => ["10.0.0.8"] }),
@@ -297,6 +317,13 @@ test("freshness distinguishes fresh stale historical and unknown", async () => {
   const unknown = (await make({ value: 1 }, {})).asf;
   assert.equal(unknown.freshness_status, "UNKNOWN");
   assert.equal(unknown.missed_polls, null);
+});
+
+test("future plausibility applies to current and historical modes", () => {
+  assert.equal(classifyFreshness("2026-01-01T00:00:30Z", "2026-01-01T00:00:00Z", 300, false, 60), "FRESH");
+  assert.equal(classifyFreshness("2026-01-01T00:00:30Z", "2026-01-01T00:00:00Z", 300, true, 60), "HISTORICAL");
+  assert.throws(() => classifyFreshness("2030-01-01T00:00:00Z", "2026-01-01T00:00:00Z", 300, false, 60), /INVALID_TIMESTAMP/);
+  assert.throws(() => classifyFreshness("2030-01-01T00:00:00Z", "2026-01-01T00:00:00Z", 300, true, 60), /INVALID_TIMESTAMP/);
 });
 
 test("unit transformation receipt stays explicit", async () => {

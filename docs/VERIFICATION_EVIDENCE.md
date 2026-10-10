@@ -22,12 +22,12 @@ found 0 vulnerabilities
 `npm test`
 
 ```text
-tests 59
-pass 59
+tests 64
+pass 64
 fail 0
 ```
 
-The repository count includes the acceptance test that decodes the actual API ZIP, independently checks every content hash and the declared digest scope, extracts to an operating-system temporary directory, imports and executes the adapter, injects invalid values and impossible calendar dates, and invokes the packaged test command. Packaged output is required to contain `tests 6` and is rejected if it contains `tests 0`.
+The repository count includes acceptance tests for both embedded-fixture and remote-HTTPS packages. They decode ZIPs, independently check content identity, extract to separate operating-system temporary directories, execute adapters, inject invalid values and timestamps, and invoke each packaged test command. Each package output must contain `tests 6` and is rejected if it contains `tests 0`.
 
 `npm run acceptance`
 
@@ -55,7 +55,7 @@ The external source returned HTTP 200 during acceptance. Its availability is not
 
 ## Artifact identity
 
-`verification.json` covers every package file except itself. It contains a sorted file-to-SHA-256 map and a SHA-256 digest of that canonical map. `package_hash` is independently the SHA-256 of the final ZIP, including `verification.json`; this avoids circular hashing. The current hashes are in the machine-readable receipt because they can change with any package source change.
+`verification.json` covers every package file except itself. It contains a sorted file-to-SHA-256 map and a SHA-256 digest of that canonical map. `package_hash` is independently the SHA-256 of the final ZIP, including `verification.json`; this avoids circular hashing. These offline digests establish internal integrity relative to trusted issuance evidence. They do not authenticate the publisher and cannot resist a fully replaced and re-signed package plus receipt.
 
 ## Production distinction
 

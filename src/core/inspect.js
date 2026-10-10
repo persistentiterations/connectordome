@@ -57,11 +57,15 @@ export async function inspectUrl(rawUrl, { fetchImpl = fetch, fixtureLoader = nu
   let res = null;
   for (let hop = 0; hop < 4; hop++) {
     if (resolveHost) assertResolvedAddressesPublic(await resolveHost(current.hostname));
-    res = await fetchImpl(current.href, {
-      method: "GET",
-      redirect: "manual",
-      headers: { Accept: "application/json, application/yaml, text/plain, */*;q=0.1" },
-    });
+    try {
+      res = await fetchImpl(current.href, {
+        method: "GET",
+        redirect: "manual",
+        headers: { Accept: "application/json, application/yaml, text/plain, */*;q=0.1" },
+      });
+    } catch {
+      return { source: current.hostname, url: current.href, content_type: null, reachability: "UNAVAILABLE", retrieval_time_ms: Date.now() - t0, provenance_class: "REMOTE_FEED", error: "source UNAVAILABLE (transport failure)", body: null, fields: [], connector_received_at: received_at, method: "GET" };
+    }
     if ([301, 302, 303, 307, 308].includes(res.status)) {
       const loc = res.headers.get("location");
       current = assertRedirectSafe(current, loc);

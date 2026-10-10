@@ -8,6 +8,9 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import worker from "../src/worker.js";
 import { unzipStore } from "../src/core/zip.js";
 import { canonical, sha256hex } from "../src/core/asf.js";
+import { buildPackage, manifestFromBuild } from "../src/core/package.js";
+import { previewEvent } from "../src/core/builder.js";
+import { flattenFields } from "../src/core/inspect.js";
 
 const fixture = fs.readFileSync(new URL("../public/fixtures/demo-station.json", import.meta.url), "utf8");
 
@@ -77,6 +80,13 @@ test("guest demo builds, extracts, executes and tests cleanly", async (t) => {
   const cliVerification = spawnSync(process.execPath, [fileURLToPath(new URL("../src/cli.js", import.meta.url)), "verify", directory], { encoding: "utf8", env: childEnv });
   assert.equal(cliVerification.status, 0, `${cliVerification.stdout}${cliVerification.stderr}`);
   assert.match(cliVerification.stdout, /content identity/);
+  const evidencePath = path.join(directory, "verification.json");
+  const evidenceSource = fs.readFileSync(evidencePath, "utf8");
+  const inconsistentEvidence = JSON.parse(evidenceSource); inconsistentEvidence.status = "HOLD";
+  fs.writeFileSync(evidencePath, JSON.stringify(inconsistentEvidence, null, 2));
+  const inconsistent = spawnSync(process.execPath, [fileURLToPath(new URL("../src/cli.js", import.meta.url)), "verify", directory], { encoding: "utf8", env: childEnv });
+  assert.notEqual(inconsistent.status, 0, "evidence status must match independently recomputed status");
+  fs.writeFileSync(evidencePath, evidenceSource);
   const readmePath = path.join(directory, "README.md");
   const readmeSource = fs.readFileSync(readmePath, "utf8");
   fs.writeFileSync(readmePath, `${readmeSource}\ntampered\n`);
@@ -110,6 +120,22 @@ test("guest demo builds, extracts, executes and tests cleanly", async (t) => {
     body.temperature = bad;
     await assert.rejects(() => adapter.sampleFromBody(body), /MISSING_VALUE|TYPE_MISMATCH/);
   }
+});
+
+test("remote HTTPS package has six passing deterministic tests", async (t) => {
+  const body = { temperature: 22.4, observed_at: "2026-08-31T12:00:00Z" };
+  const inspection = { source: "example.org", url: "https://example.org/data.json", body, fields: flattenFields(body), reachability: "OK", provenance_class: "REMOTE_FEED", connector_received_at: "2026-08-31T12:00:10Z" };
+  const mapping = { field: "temperature", capability: "weather.air.temperature", units: "C", data_type: "number", time_field: "observed_at" };
+  const preview = await previewEvent({ inspection, mapping, kind: "web_api" });
+  const manifest = manifestFromBuild({ kind: "web_api", name: "remote-clean-room", inspection, mapping, description: "remote test" });
+  const built = await buildPackage({ manifest, preview, mapping, inspection });
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "connectordome-remote-")); t.after(() => fs.rmSync(directory, { recursive: true, force: true }));
+  for (const [name, data] of Object.entries(unzipStore(built.zip))) { const destination = path.join(directory, ...name.split("/")); fs.mkdirSync(path.dirname(destination), { recursive: true }); fs.writeFileSync(destination, data); }
+  const env = { ...process.env }; delete env.NODE_TEST_CONTEXT;
+  const run = spawnSync(process.execPath, ["--test", "tests/adapter.test.mjs"], { cwd: directory, encoding: "utf8", env });
+  assert.equal(run.status, 0, `${run.stdout}${run.stderr}`); assert.match(`${run.stdout}${run.stderr}`, /tests 6/);
+  const adapter = await import(pathToFileURL(path.join(directory, "adapter.mjs")).href + `?${Date.now()}`);
+  assert.equal((await adapter.sampleFromBody(body, { receivedAt: "2026-08-31T12:00:01Z" })).freshness_status, "FRESH");
 });
 
 test("preview and runtime have equivalent event semantics", async () => {

@@ -55,7 +55,7 @@ export function verifyConnector({ manifest, files, preview }) {
   const blob = Object.entries(files || {})
     .map(([n, c]) => `${n}\n${c}`)
     .join("\n");
-  const secretHit = /(?:api[_-]?key|access[_-]?token|refresh[_-]?token|password|client[_-]?secret|private[_-]?key)\s*[=:]\s*["'][^"']{6,}["']/i.test(blob);
+  const secretHit = /(?:api[_-]?key|access[_-]?token|refresh[_-]?token|password|client[_-]?secret|private[_-]?key)\s*[=:]\s*(?:["'][^"']{6,}["']|(?:bearer\s+)?[a-z0-9_./+=-]{8,})/i.test(blob);
   const forbiddenHit = FORBIDDEN_IN_PACKAGE.find((s) => blob.includes(s));
   add("no embedded secrets", !secretHit && !blob.includes("secret_value"), "secret_ref only");
   add("no execution surface", !forbiddenHit && !mutating, forbiddenHit ? `hit ${forbiddenHit}` : "no shell/POST/actuate");

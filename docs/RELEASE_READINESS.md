@@ -29,8 +29,8 @@ node src/cli.js inspect https://connectordome.com/fixtures/demo-station.json
 Expected evidence:
 
 - dependency audit: zero known vulnerabilities;
-- repository tests: 59 passed, 0 failed;
-- extracted package tests: 6 passed, 0 failed, never zero discovered;
+- repository tests: 64 passed, 0 failed;
+- extracted package tests: 6 passed, 0 failed for each of embedded-fixture and remote-HTTPS packages, never zero discovered;
 - local Worker, guest build, ZIP extraction, adapter execution, HOLD gate: PASS;
 - Worker dry-run completes without uploading;
 - external HTTPS check is reported separately from deterministic local checks.

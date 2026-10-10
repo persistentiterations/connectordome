@@ -4,6 +4,7 @@ import { getByPath } from "./inspect.js";
 
 export const DATA_TYPES = ["number", "string", "boolean", "object"];
 export const FRESHNESS_STATES = ["FRESH", "STALE", "HISTORICAL", "UNKNOWN"];
+export const DEFAULT_FUTURE_SKEW_SECONDS = 60;
 const NUMERIC_TEXT = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/;
 const ISO_TIME = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.(\d+))?(Z|([+-])(\d{2}):(\d{2}))$/;
 
@@ -77,11 +78,11 @@ export function parseSourceTime(raw) {
   return text;
 }
 
-export function classifyFreshness(sourceObservedAt, now, thresholdSeconds = 300, historical = false) {
+export function classifyFreshness(sourceObservedAt, now, thresholdSeconds = 300, historical = false, futureSkewSeconds = DEFAULT_FUTURE_SKEW_SECONDS) {
   if (!sourceObservedAt) return "UNKNOWN";
-  if (historical) return "HISTORICAL";
   const age = Date.parse(now) - Date.parse(sourceObservedAt);
-  if (!Number.isFinite(age) || age < 0) throw observationError("INVALID_TIMESTAMP", "source time is in the future");
+  if (!Number.isFinite(age) || age < -(futureSkewSeconds * 1000)) throw observationError("INVALID_TIMESTAMP", "source time exceeds the allowed future clock skew");
+  if (historical) return "HISTORICAL";
   return age > thresholdSeconds * 1000 ? "STALE" : "FRESH";
 }
 
@@ -91,7 +92,7 @@ export async function createObservationEvent({ body, manifest, receivedAt = utcn
   const raw = getByPath(body, capability.field);
   const value = normalizeObservation(raw, capability.data_type);
   const sourceObservedAt = capability.time_field ? parseSourceTime(getByPath(body, capability.time_field)) : null;
-  const freshness = classifyFreshness(sourceObservedAt, receivedAt, manifest.freshness_threshold_s ?? 300, manifest.observation_mode === "historical");
+  const freshness = classifyFreshness(sourceObservedAt, receivedAt, manifest.freshness_threshold_s ?? 300, manifest.observation_mode === "historical", manifest.future_skew_tolerance_s ?? DEFAULT_FUTURE_SKEW_SECONDS);
   const sourceHealth = freshness === "FRESH" ? "OK" : freshness === "STALE" ? "STALE" : freshness === "HISTORICAL" ? "HISTORICAL" : "UNKNOWN_FRESHNESS";
   return assignEventId(receptorEvent({
     source_id: manifest.source_id || manifest.source_host || manifest.source_reference || "unknown-source",
@@ -116,6 +117,7 @@ export async function createObservationEvent({ body, manifest, receivedAt = utcn
     source_health: sourceHealth,
     freshness_status: freshness,
     freshness_threshold_s: manifest.freshness_threshold_s ?? 300,
+    future_skew_tolerance_s: manifest.future_skew_tolerance_s ?? DEFAULT_FUTURE_SKEW_SECONDS,
     adapter_id: manifest.adapter_id || `connectordome.${manifest.name}`,
     adapter_version: manifest.version,
   }));
@@ -123,7 +125,7 @@ export async function createObservationEvent({ body, manifest, receivedAt = utcn
 
 // Generated packages receive this same source module, with imports rewritten locally.
 export function runtimeModuleSource() {
-  return `export const ACTION_AUTHORITY = "NONE";\nconst DATA_TYPES = ${JSON.stringify(DATA_TYPES)};\nconst IDENTITY_FIELDS = ${JSON.stringify(IDENTITY_FIELDS)};\nconst NUMERIC_TEXT = ${NUMERIC_TEXT};\nconst ISO_TIME = ${ISO_TIME};\nexport ${observationError.toString()}\n${normalizeObservation.toString()}\n${isLeapYear.toString()}\n${daysInMonth.toString()}\n${parseSourceTime.toString()}\n${classifyFreshness.toString()}\n${canonicalRuntime.toString()}\n${sha256Runtime.toString()}\n${parseFieldPathRuntime.toString()}\n${getByPathRuntime.toString()}\nexport ${createRuntimeEvent.toString()}\n`;
+  return `export const ACTION_AUTHORITY = "NONE";\nconst DATA_TYPES = ${JSON.stringify(DATA_TYPES)};\nconst IDENTITY_FIELDS = ${JSON.stringify(IDENTITY_FIELDS)};\nconst DEFAULT_FUTURE_SKEW_SECONDS = ${DEFAULT_FUTURE_SKEW_SECONDS};\nconst NUMERIC_TEXT = ${NUMERIC_TEXT};\nconst ISO_TIME = ${ISO_TIME};\nexport ${observationError.toString()}\n${normalizeObservation.toString()}\n${isLeapYear.toString()}\n${daysInMonth.toString()}\n${parseSourceTime.toString()}\n${classifyFreshness.toString()}\n${canonicalRuntime.toString()}\n${sha256Runtime.toString()}\n${parseFieldPathRuntime.toString()}\n${getByPathRuntime.toString()}\nexport ${createRuntimeEvent.toString()}\n`;
 }
 
 function canonicalRuntime(value) {
@@ -172,7 +174,7 @@ async function createRuntimeEvent(body, manifest, times = {}) {
   const observedAtHost = times.observedAtHost || new Date().toISOString();
   const value = normalizeObservation(getByPathRuntime(body, capability.field), capability.data_type);
   const sourceObservedAt = capability.time_field ? parseSourceTime(getByPathRuntime(body, capability.time_field)) : null;
-  const freshness = classifyFreshness(sourceObservedAt, receivedAt, manifest.freshness_threshold_s ?? 300, manifest.observation_mode === "historical");
+  const freshness = classifyFreshness(sourceObservedAt, receivedAt, manifest.freshness_threshold_s ?? 300, manifest.observation_mode === "historical", manifest.future_skew_tolerance_s ?? DEFAULT_FUTURE_SKEW_SECONDS);
   const sourceHealth = freshness === "FRESH" ? "OK" : freshness === "STALE" ? "STALE" : freshness === "HISTORICAL" ? "HISTORICAL" : "UNKNOWN_FRESHNESS";
   const event = {
     event_id: "",
@@ -205,7 +207,8 @@ async function createRuntimeEvent(body, manifest, times = {}) {
     last_success_at: receivedAt,
     missed_polls: null,
     freshness_status: freshness,
-    freshness_threshold_s: manifest.freshness_threshold_s ?? 300
+    freshness_threshold_s: manifest.freshness_threshold_s ?? 300,
+    future_skew_tolerance_s: manifest.future_skew_tolerance_s ?? DEFAULT_FUTURE_SKEW_SECONDS
   };
   const identity = {};
   for (const field of IDENTITY_FIELDS) identity[field] = event[field] ?? null;
