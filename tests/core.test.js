@@ -295,6 +295,9 @@ test("CLI DNS resolution rejects private and mixed answers", async () => {
   await assert.rejects(() => resolvePinnedTarget("x.test", async () => [{ address: "10.0.0.8", family: 4 }]), /SSRF_BLOCKED/);
   await assert.rejects(() => resolvePinnedTarget("x.test", async () => [{ address: "93.184.216.34", family: 4 }, { address: "127.0.0.1", family: 4 }]), /SSRF_BLOCKED/);
   assert.deepEqual(await resolvePinnedTarget("x.test", async () => [{ address: "93.184.216.34", family: 4 }]), { address: "93.184.216.34", family: 4 });
+  let options;
+  await resolvePinnedTarget("x.test", async (_host, supplied) => { options = supplied; return [{ address: "93.184.216.34", family: 4 }]; });
+  assert.equal(options.family, 4, "v0.1.2 pins only its documented IPv4 acquisition path");
 });
 
 test("DNS and redirect SSRF defenses use controlled fixtures", async () => {

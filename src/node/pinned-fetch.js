@@ -3,7 +3,7 @@ import https from "node:https";
 import { assertResolvedAddressesPublic } from "../core/ssrf.js";
 
 export async function resolvePinnedTarget(hostname, lookupImpl = dns.lookup) {
-  const records = await lookupImpl(hostname, { all: true, verbatim: true });
+  const records = await lookupImpl(hostname, { all: true, verbatim: true, family: 4 });
   if (!Array.isArray(records) || records.length === 0) throw new Error("UNAVAILABLE: DNS returned no addresses");
   assertResolvedAddressesPublic(records.map((record) => record.address));
   return { address: records[0].address, family: records[0].family };
@@ -17,7 +17,10 @@ export function createPinnedHttpsFetch({ lookupImpl = dns.lookup, requestImpl = 
       const request = requestImpl(url, {
         method: options.method || "GET",
         headers: options.headers,
-        lookup(_hostname, _options, callback) { callback(null, target.address, target.family); },
+        lookup(_hostname, lookupOptions, callback) {
+          if (lookupOptions?.all) callback(null, [{ address: target.address, family: target.family }]);
+          else callback(null, target.address, target.family);
+        },
       }, (response) => {
         const chunks = [];
         response.on("data", (chunk) => chunks.push(chunk));
