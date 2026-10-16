@@ -6,6 +6,9 @@ import { suggestFromDescription } from "./core/suggest.js";
 import { buildPackage, manifestFromBuild } from "./core/package.js";
 import { getConnector, searchRegistry } from "./core/registry.js";
 import { assertPublicHttpsUrl } from "./core/ssrf.js";
+import { getSourceFamily, listSourceFamilies } from "./core/sensorium.js";
+import { buildObservationFrame, compareFrames, resolveAnchor, traceFrame } from "./core/grounding.js";
+import { demoFrameRequest } from "./core/ggr-fixtures.js";
 
 const json = (obj, status = 200) =>
   new Response(JSON.stringify(obj, null, 2), {
@@ -60,9 +63,27 @@ async function handleApi(request, env, url) {
     if (!c) return json({ error: "unknown connector" }, 404);
     return json(c);
   }
+  if (request.method === "GET" && url.pathname === "/api/sensorium/sources") {
+    return json({ schema: "connectordome.sensorium-index/v0.3", source_families: listSourceFamilies({ q: url.searchParams.get("q") || "", category: url.searchParams.get("category") || "" }), action_authority: "NONE" });
+  }
+  if (request.method === "GET" && url.pathname.startsWith("/api/sensorium/sources/")) {
+    const source = getSourceFamily(url.pathname.slice("/api/sensorium/sources/".length));
+    return source ? json(source) : json({ error: "unknown source family" }, 404);
+  }
+  if (request.method === "GET" && url.pathname === "/api/ggr/demo") {
+    const scenario = url.searchParams.get("scenario") || "nominal";
+    const requestBody = await demoFrameRequest(scenario);
+    const frame = await buildObservationFrame(requestBody);
+    return json({ scenario, simulated: true, frame });
+  }
 
   if (request.method !== "POST") return json({ error: "method not allowed" }, 405);
   const body = await request.json().catch(() => ({}));
+
+  if (url.pathname === "/api/ggr/anchor") return json(await resolveAnchor(body));
+  if (url.pathname === "/api/ggr/frame") return json(await buildObservationFrame(body));
+  if (url.pathname === "/api/ggr/delta") return json(await compareFrames(body.left, body.right));
+  if (url.pathname === "/api/ggr/trace") return json(traceFrame(body.frame));
 
   if (url.pathname === "/api/inspect") {
     const target = body.url;

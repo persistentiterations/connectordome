@@ -1,0 +1,2 @@
+from setuptools import setup
+setup(name='connectordome_ros2_adapter', version='0.3.0', packages=['connectordome_ros2_adapter'], data_files=[('share/ament_index/resource_index/packages',['resource/connectordome_ros2_adapter']),('share/connectordome_ros2_adapter',['package.xml'])], install_requires=['setuptools'], zip_safe=True, entry_points={'console_scripts':['frame_publisher = connectordome_ros2_adapter.frame_publisher:main']})

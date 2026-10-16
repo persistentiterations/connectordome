@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://connectordome.com/schemas/source-family.v0.3.schema.json",
+  "title": "ConnectorDome Open Sensorium source family v0.3",
+  "type": "object",
+  "required": ["schema", "id", "name", "category", "publisher", "documentation_url", "api_base_url", "access", "permissions", "operational_status", "verification", "adapter_status", "action_authority"],
+  "properties": {
+    "schema": { "const": "connectordome.source-family/v0.3" },
+    "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]+$" },
+    "name": { "type": "string", "minLength": 1 },
+    "category": { "type": "string", "minLength": 1 },
+    "publisher": { "type": "object", "required": ["name", "url"] },
+    "documentation_url": { "type": "string", "format": "uri" },
+    "api_base_url": { "type": "string", "format": "uri", "pattern": "^https://" },
+    "access": { "type": "object", "required": ["method", "authentication", "format", "account_required"], "properties": { "method": { "const": "GET" } } },
+    "permissions": { "type": "object", "required": ["license_status", "permitted_uses", "ai_training", "evidence_url"] },
+    "operational_status": { "enum": ["LIVE_VERIFIED", "UNAVAILABLE", "WITHDRAWN", "UNKNOWN"] },
+    "verification": { "type": "object", "required": ["verified_at", "http_status", "method", "receipt"] },
+    "adapter_status": { "enum": ["COMPLETE_AND_TESTED", "IMPLEMENTED_NOT_INTEGRATION_TESTED", "SPECIFIED_NOT_IMPLEMENTED", "BLOCKED"] },
+    "action_authority": { "const": "NONE" }
+  },
+  "additionalProperties": true
+}

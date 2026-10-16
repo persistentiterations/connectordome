@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://connectordome.com/schemas/grounding-reference.v0.3.schema.json",
+  "title": "ConnectorDome Global Grounding Reference declaration v0.3",
+  "type": "object",
+  "required": ["reference_id", "kind", "coordinate_reference", "position", "spatial_uncertainty_m", "time_basis", "validity", "provenance"],
+  "properties": {
+    "reference_id": { "type": "string", "minLength": 1 },
+    "kind": { "enum": ["FIXED_TERRESTRIAL", "MOVING", "PORTABLE", "SIMULATED", "SCIENTIFIC"] },
+    "coordinate_reference": { "const": "EPSG:4326" },
+    "position": { "type": "object", "required": ["latitude", "longitude"], "properties": { "latitude": { "type": "number", "minimum": -90, "maximum": 90 }, "longitude": { "type": "number", "minimum": -180, "maximum": 180 }, "altitude_m": { "type": "number" } } },
+    "spatial_uncertainty_m": { "type": "number", "minimum": 0 },
+    "time_basis": { "type": "object", "required": ["scale", "uncertainty_ms"], "properties": { "scale": { "type": "string" }, "uncertainty_ms": { "type": "number", "minimum": 0 } } },
+    "validity": { "type": "object", "required": ["from"], "properties": { "from": { "type": "string" }, "to": { "type": ["string", "null"] } } },
+    "provenance": { "type": "object" }
+  },
+  "additionalProperties": false
+}
